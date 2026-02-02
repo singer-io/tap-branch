@@ -1,0 +1,271 @@
+{
+    "type": "object",
+    "properties": {
+        "channel": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "feature": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "campaign": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "stage": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "tags": {
+            "type": [
+                "null",
+                "array"
+            ],
+            "items": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            }
+        },
+        "data": {
+            "type": [
+                "null",
+                "object"
+            ],
+            "properties": {
+                "~channel": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "url": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "$one_time_use": {
+                    "type": [
+                        "null",
+                        "boolean"
+                    ]
+                },
+                "+url": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "~creation_source": {
+                    "type": [
+                        "null",
+                        "integer"
+                    ]
+                },
+                "$match_duration": {
+                    "type": [
+                        "null",
+                        "integer"
+                    ]
+                },
+                "$fallback_url": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "$identity_id": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "$id": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "$fallback_url_xx": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "$desktop_url": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "$ios_url": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "$ios_url_xx": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "$ipad_url": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "$android_url": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "$android_url_xx": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "$samsung_url": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "$huawei_url": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "$windows_phone_url": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "$blackberry_url": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "$fire_url": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "$ios_wechat_url": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "$android_wechat_url": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "$web_only": {
+                    "type": [
+                        "null",
+                        "boolean"
+                    ]
+                },
+                "$desktop_web_only": {
+                    "type": [
+                        "null",
+                        "boolean"
+                    ]
+                },
+                "$mobile_web_only": {
+                    "type": [
+                        "null",
+                        "boolean"
+                    ]
+                },
+                "$after_click_url": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "$afterclick_desktop_url": {
+                    "type": [
+                        "null",
+                        "boolean"
+                    ]
+                },
+                "$canonical_url": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "$deeplink_path": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "$og_title": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "$og_description": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "$og_image_url": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                }
+            }
+        },
+        "alias": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "type": {
+            "type": [
+                "null",
+                "integer"
+            ]
+        },
+        "duration": {
+            "type": [
+                "null",
+                "integer"
+            ]
+        },
+        "id": {
+            "type": [
+                "null",
+                "string"
+            ]
+        }
+    }
+}
