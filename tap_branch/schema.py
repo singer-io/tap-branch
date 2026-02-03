@@ -48,7 +48,11 @@ def get_schemas() -> Tuple[Dict, Dict]:
 
     refs = load_schema_references()
     for stream_name, stream_obj in STREAMS.items():
-        schema_path = get_abs_path("schemas/{}.json".format(stream_name))
+        # Added a custom attribute resolver in case of dynamic event streams
+        # This is done as for all dynamic events streams,
+        # schema is common and present in shared folder
+        schema_path_ref = getattr(stream_obj, "schema_path", stream_name)
+        schema_path = get_abs_path("schemas/{}.json".format(schema_path_ref))
         with open(schema_path) as file:
             schema = json.load(file)
 

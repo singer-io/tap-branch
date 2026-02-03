@@ -1,5 +1,6 @@
 import json
 import sys
+
 import singer
 
 from tap_branch.client import Client
