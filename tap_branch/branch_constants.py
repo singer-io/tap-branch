@@ -1,4 +1,4 @@
-""" Branch speicific constants used across the tap """
+""" Branch specific constants used across the tap """
 
 from dataclasses import dataclass
 from enum import Enum
@@ -69,7 +69,7 @@ class BranchExportEventDefinition:
     is_blocked: bool
 
 
-# FInal mapping of report types to their definitions
+# Final mapping of report types to their definitions
 # NOTE: Add new mappings here as well when Branch adds new report types
 BRANCH_EXPORT_EVENT_DEFINITIONS = {
     BranchReportType.EO_IMPRESSION: BranchExportEventDefinition(

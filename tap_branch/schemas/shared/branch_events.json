@@ -260,7 +260,10 @@
         "array"
       ],
       "items": {
-        "type": "string"
+        "type": [
+          "null",
+          "string"
+        ]
       }
     },
     "last_attributed_touch_data_tilde_technology_partner": {
@@ -578,7 +581,10 @@
         "array"
       ],
       "items": {
-        "type": "string"
+        "type": [
+          "null",
+          "string"
+        ]
       }
     },
     "user_data_platform": {
@@ -748,8 +754,9 @@
     "custom_data": {
       "type": [
         "null",
-        "array"
-      ]
+        "object"
+      ],
+      "additionalProperties": true
     },
     "days_from_install_to_opt_in": {
       "type": [
@@ -1680,8 +1687,9 @@
     "webhook_request_headers": {
       "type": [
         "null",
-        "array"
-      ]
+        "object"
+      ],
+      "additionalProperties": true
     },
     "webhook_request_url": {
       "type": [
