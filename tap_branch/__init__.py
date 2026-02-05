@@ -1,5 +1,6 @@
 import json
 import sys
+
 import singer
 
 from tap_branch.client import Client
@@ -8,7 +9,9 @@ from tap_branch.sync import sync
 
 LOGGER = singer.get_logger()
 
-REQUIRED_CONFIG_KEYS = ['api_key', 'start_date']
+REQUIRED_CONFIG_KEYS = ['branch_app_id', 'branch_key',
+                        'branch_secret', 'branch_access_token',
+                        'deeplink_urls', 'start_date']
 
 
 def do_discover():

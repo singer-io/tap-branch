@@ -1,0 +1,620 @@
+{
+    "type": "object",
+    "properties": {
+        "alternate_short_url_domain": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "always_open_app": {
+            "type": [
+                "null",
+                "integer"
+            ]
+        },
+        "android_cd_enabled": {
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        "android_cd_hashed": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "android_tablet_url": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "auto_fetch": {
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        "deepview_configs": {
+            "type": [
+                "null",
+                "object"
+            ],
+            "properties": {
+                "ios": {
+                    "type": [
+                        "null",
+                        "object"
+                    ],
+                    "properties": {
+                        "enabled": {
+                            "type": [
+                                "null",
+                                "boolean"
+                            ]
+                        },
+                        "clipboard_deepview": {
+                            "type": [
+                                "null",
+                                "string"
+                            ]
+                        },
+                        "deepview_audience_id": {
+                            "type": [
+                                "null",
+                                "integer"
+                            ]
+                        }
+                    }
+                },
+                "android": {
+                    "type": [
+                        "null",
+                        "object"
+                    ],
+                    "properties": {
+                        "enabled": {
+                            "type": [
+                                "null",
+                                "boolean"
+                            ]
+                        },
+                        "clipboard_deepview": {
+                            "type": [
+                                "null",
+                                "string"
+                            ]
+                        },
+                        "deepview_audience_id": {
+                            "type": [
+                                "null",
+                                "integer"
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "default_short_url_domain": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "desktop_uri_scheme": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "esp_config": {
+            "type": [
+                "null",
+                "object"
+            ],
+            "properties": {
+                "map_query_params_to_deep_link_data": {
+                    "type": [
+                        "null",
+                        "array"
+                    ],
+                    "items": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    }
+                },
+                "secrets": {
+                    "type": [
+                        "null",
+                        "array"
+                    ],
+                    "items": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    }
+                },
+                "strip_protocol_from_deeplink_path": {
+                    "type": [
+                        "null",
+                        "boolean"
+                    ]
+                },
+                "email_enabled": {
+                    "type": [
+                        "null",
+                        "boolean"
+                    ]
+                },
+                "strip_protocol_from_android_deeplink_path": {
+                    "type": [
+                        "null",
+                        "boolean"
+                    ]
+                },
+                "default_to_open_for_android_deeplink_path": {
+                    "type": [
+                        "null",
+                        "boolean"
+                    ]
+                },
+                "append_full_url_for_key": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "append_all_params": {
+                    "type": [
+                        "null",
+                        "boolean"
+                    ]
+                },
+                "ads_enabled": {
+                    "type": [
+                        "null",
+                        "boolean"
+                    ]
+                },
+                "append_path_for_key": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "strip_protocol_from_ios_deeplink_path": {
+                    "type": [
+                        "null",
+                        "boolean"
+                    ]
+                },
+                "has_confirmed": {
+                    "type": [
+                        "null",
+                        "boolean"
+                    ]
+                }
+            }
+        },
+        "imei_collection_enabled": {
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        "imei_terms_and_conditions": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "ios_bundle_settings": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "ios_additional_bundle_ids": {
+            "type": [
+                "null",
+                "array"
+            ],
+            "items": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            }
+        },
+        "ios_cd_enabled": {
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        "ios_cd_hashed": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "ipad_url": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "ios_app_store_id": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "map_utm_params": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "reserved_analytics_to_utm": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "origin": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "sitemap_enabled": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "tmta_enabled": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "wechat_url": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "redirect_domains_whitelist": {
+            "type": [
+                "null",
+                "array"
+            ],
+            "items": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            }
+        },
+        "journeys_open_app": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "passive_deepview_ios": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "passive_deepview_android": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "uri_redirect_mode": {
+            "type": [
+                "null",
+                "integer"
+            ]
+        },
+        "timezone": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "mac_uri_scheme": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "mac_store_url": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "windows_uri_scheme": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "windows_store_url": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "windows_package_family_name": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "organization_id": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "sk_ad_network_enabled": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "ios_app_store_id_verified": {
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        "local_currency": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "organic_search_domains": {
+            "type": [
+                "null",
+                "array"
+            ],
+            "items": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            }
+        },
+        "id": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "app_key": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "zuora_account_id": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "creation_date": {
+            "type": [
+                "null",
+                "string"
+            ],
+            "format": "date-time"
+        },
+        "app_name": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "dev_name": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "dev_email": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "dev_phone_number": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "android_app": {
+            "type": [
+                "null",
+                "integer"
+            ]
+        },
+        "android_url": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "android_uri_scheme": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "android_package_name": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "sha256_cert_fingerprints": {
+            "type": [
+                "null",
+                "array"
+            ],
+            "items": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            }
+        },
+        "android_app_links_enabled": {
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        "ios_app": {
+            "type": [
+                "null",
+                "integer"
+            ]
+        },
+        "ios_url": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "ios_uri_scheme": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "ios_store_country": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "ios_bundle_id": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "ios_team_id": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "universal_linking_enabled": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "fire_url": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "windows_phone_url": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "blackberry_url": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "web_url": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "default_desktop_url": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "short_url_domain": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "text_message": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "og_app_id": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "og_title": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "og_image_url": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "og_description": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "deepview_desktop": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "deepview_ios": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "deepview_android": {
+            "type": [
+                "null",
+                "string"
+            ]
+        }
+    }
+}
