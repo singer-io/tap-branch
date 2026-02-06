@@ -113,3 +113,21 @@ ERROR_CODE_EXCEPTION_MAPPING = {
         "message": "API service is currently unavailable."
     }
 }
+
+
+# Custom Branch Exceptions
+class BranchUnsupportedFieldsError(Exception):
+    def __init__(self, fields: list[str], raw_response: dict):
+        self.fields = fields
+        self.raw_response = raw_response
+        super().__init__(f"Unsupported fields from Branch: {fields}")
+
+
+class BranchExportFailed(Exception):
+    """ Class that represents branch export job not completed under set timeout"""
+    pass
+
+
+class BranchFatalRateLimitError(Exception):
+    """Non-retryable rate limit (retry too long)"""
+    pass
