@@ -19,7 +19,7 @@ from tap_branch.branch_utils import (check_branch_rate_limit,
                                      handle_branch_validation_error)
 from tap_branch.exceptions import (ERROR_CODE_EXCEPTION_MAPPING,
                                    BranchBackoffError, BranchError,
-                                   BranchExportFailed, BranchRateLimitError,
+                                   BranchExportFailed, BranchExportTimeout, BranchRateLimitError,
                                    BranchUnsupportedFieldsError)
 
 LOGGER = get_logger()
@@ -33,14 +33,15 @@ def raise_for_error(response: requests.Response) -> None:
 
     :param resp: requests.Response object
     """
-    # Check for branch fatal-rate-limit error first
-    check_branch_rate_limit(response=response)
 
     try:
         response_json = response.json()
     except Exception:
         response_json = {}
     if response.status_code not in [200, 201, 204]:
+        if response.status_code == 429:
+            check_branch_rate_limit(response)
+
         if response_json.get("error"):
             message = f"HTTP-error-code: {response.status_code}, Error: {response_json.get('error')}"
         else:
@@ -269,7 +270,7 @@ class Client:
 
             time.sleep(POLL_INTERVAL)
 
-        raise BranchExportFailed("Export timed out after {} minutes".format(JOB_TIMEOUT / 60))
+        raise BranchExportTimeout("Export Job timed out after {} minutes".format(JOB_TIMEOUT / 60))
 
     def create_export_job(self, report_type: str, api_config: BranchExportConfig):
         """ Function to create a export Job for the specified report_type

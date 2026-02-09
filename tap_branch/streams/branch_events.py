@@ -95,12 +95,12 @@ class BranchEventsBaseStream(IncrementalStream):
                 return 0
 
             job_start = pendulum.now("UTC")
-            LOGGER.info(f"JOB Start {job_start.to_iso8601_string()} \n")
             max_bookmark = initial_bookmark
             # If data is ready, initiate export job.
             while export_start < job_start:
 
                 window_end = self.get_window_configurations(export_start=export_start)
+                LOGGER.info(f"Initiating export job for the time period {export_start} to {window_end} against the report_type {report_type}")
 
                 create_export_api_config = BranchExportConfig(
                                             method="POST",

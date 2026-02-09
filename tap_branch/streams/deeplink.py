@@ -51,6 +51,7 @@ class DeepLink(FullTableStream):
         # Iterate on all the deeplink urls and extract information
         with metrics.record_counter(self.tap_stream_id) as counter:
             for url in deeplink_urls:
+                url = url.strip()
                 # Set the required query_params
                 query_params = self.client.build_query_params(endpoint_config=self.endpoint_config,
                                                               query_params_data={

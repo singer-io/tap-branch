@@ -46,8 +46,6 @@ def handle_branch_validation_error(response: requests.Response):
 
 
 def check_branch_rate_limit(response: requests.Response):
-    if response.status_code != 429:
-        return
 
     try:
         payload = response.json()

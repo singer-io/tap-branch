@@ -124,6 +124,11 @@ class BranchUnsupportedFieldsError(Exception):
 
 
 class BranchExportFailed(Exception):
+    """ Class that represents branch export job failed to complete successfully"""
+    pass
+
+
+class BranchExportTimeout(Exception):
     """ Class that represents branch export job not completed under set timeout"""
     pass
 
