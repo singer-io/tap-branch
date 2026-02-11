@@ -25,7 +25,7 @@ class TestUtils(unittest.TestCase):
 
         with self.assertRaises(BranchUnsupportedFieldsError) as context:
             handle_branch_validation_error(mock_response)
-            self.assertIn("test_field", context.exception.fields)
+        self.assertIn("test_field", context.exception.fields)
 
     @parameterized.expand([
         ["small retry seconds", 10, BranchRateLimitError, "Rate limit exceeded retry after 10 seconds."],

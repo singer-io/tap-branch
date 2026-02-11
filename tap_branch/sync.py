@@ -66,8 +66,8 @@ def sync(client: Client, config: Dict, catalog: singer.Catalog, state) -> None:
                 LOGGER.error("Fatal Rate Limit Error for stream {}. Message: {}. Writing state".format(stream_name, str(err)))
                 singer.write_state(state)
 
-                # Re-raise the error to stop the sync
-                raise err
+                # Re-raise the error to stop the sync while preserving the original traceback
+                raise
 
             update_currently_syncing(state, None)
             LOGGER.info(

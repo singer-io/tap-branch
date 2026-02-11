@@ -38,7 +38,7 @@ class BranchEventsBaseStream(IncrementalStream):
 
         data_url = job_response["response_url"]
 
-        with requests.get(data_url, stream=True) as r:
+        with requests.get(data_url, stream=True, timeout=JOB_TIMEOUT) as r:
             r.raise_for_status()
 
             with gzip.GzipFile(fileobj=r.raw) as gz:
@@ -47,8 +47,8 @@ class BranchEventsBaseStream(IncrementalStream):
                     yield json.loads(line)
 
     def get_window_configurations(self, export_start: pendulum.DateTime):
-        window_size = self.client.config.get("branch_window_size", BRANCH_MAX_DATE_WINDOW)
-        if int(window_size) > 60:
+        window_size = int(self.client.config.get("branch_window_size", BRANCH_MAX_DATE_WINDOW))
+        if window_size > 60:
             LOGGER.info(f"Window size {window_size} is greater than 60, setting to max {BRANCH_MAX_DATE_WINDOW}")
             window_size = BRANCH_MAX_DATE_WINDOW
 
@@ -91,7 +91,7 @@ class BranchEventsBaseStream(IncrementalStream):
                                                           report_type=report_type,
                                                           api_config=data_ready_api_config)
             if data_ready is False:
-                LOGGER.info(f"Data is not ready for the time period {export_start} againt the report_type {report_type}")
+                LOGGER.info(f"Data is not ready for the time period {export_start} against the report_type {report_type}")
                 return 0
 
             job_start = pendulum.now("UTC")

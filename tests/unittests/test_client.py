@@ -165,10 +165,10 @@ class TestClient(unittest.TestCase):
         with self.assertRaises(BranchExportFailed) as ctx:
             client.check_export_job_status("dummy", None)
 
-            self.assertEqual(
-                str(ctx.exception),
-                "Export job failed with status: fail"
-            )
+        self.assertEqual(
+            str(ctx.exception),
+            "Export job failed with status: fail"
+        )
 
         self.assertEqual(mock_poll.call_count, 1)
 
@@ -223,6 +223,6 @@ class TestClient(unittest.TestCase):
 
         with self.assertRaises(BranchUnsupportedFieldsError) as ctx:
             client.create_export_job(report_type="dummy_report", api_config=MagicMock())
-            self.assertEqual(ctx.exception.fields, ["field1", "field2"])
+        self.assertEqual(ctx.exception.fields, ["field1", "field2"])
 
         self.assertEqual(mock_make_request.call_count, 2)
