@@ -3,6 +3,6 @@
     "branch_access_token": "your_branch_access_token",
     "branch_key": "your_branch_key",
     "branch_secret": "your_branch_secret",
-    "deeplink_urls": ["deeplink-url-1", "deeplink-url-2"],
+    "deeplink_urls": "deeplink-url-1, deeplink-url-2",
     "start_date": "2023-01-01T00:00:00Z"
 }

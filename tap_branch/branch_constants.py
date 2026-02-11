@@ -5,12 +5,14 @@ from enum import Enum
 from pathlib import Path
 from typing import List
 
-BRANCH_MAX_DATE_WINDOW = 30
+BRANCH_MAX_DATE_WINDOW = 60
 
 # We will wait for 1 hour for an export job to be completed and it will be polled every 2 mins
 JOB_TIMEOUT = 60 * 60
 POLL_INTERVAL = 60 * 2
 
+MAX_RETRY_WAIT_SECONDS = 60
+MAX_RECORDS_TO_FETCH = 1_000_000
 
 BASE_DIR = Path(__file__).resolve().parent
 
