@@ -15,7 +15,7 @@ from tap_branch.branch_api_contract import (BranchDataReadyPayload,
                                             EndpointConfig)
 from tap_branch.branch_constants import (JOB_TIMEOUT, MAX_RECORDS_TO_FETCH,
                                          POLL_INTERVAL)
-from tap_branch.branch_utils import (check_branch_rate_limit,
+from tap_branch.branch_utils import (raise_for_branch_rate_limit,
                                      handle_branch_validation_error)
 from tap_branch.exceptions import (ERROR_CODE_EXCEPTION_MAPPING,
                                    BranchBackoffError, BranchError,
@@ -40,7 +40,7 @@ def raise_for_error(response: requests.Response) -> None:
         response_json = {}
     if response.status_code not in [200, 201, 204]:
         if response.status_code == 429:
-            check_branch_rate_limit(response)
+            raise_for_branch_rate_limit(response)
 
         if response_json.get("error"):
             message = f"HTTP-error-code: {response.status_code}, Error: {response_json.get('error')}"
@@ -169,7 +169,7 @@ class Client:
             BranchBackoffError,
             BranchRateLimitError
         ),
-        max_tries=6,
+        max_tries=7,
         factor=2,
     )
     def __make_request(

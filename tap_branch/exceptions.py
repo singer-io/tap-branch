@@ -116,23 +116,23 @@ ERROR_CODE_EXCEPTION_MAPPING = {
 
 
 # Custom Branch Exceptions
-class BranchUnsupportedFieldsError(Exception):
+class BranchUnsupportedFieldsError(BranchError):
     def __init__(self, fields: list[str], raw_response: dict):
         self.fields = fields
         self.raw_response = raw_response
         super().__init__(f"Unsupported fields from Branch: {fields}")
 
 
-class BranchExportFailed(Exception):
+class BranchExportFailed(BranchError):
     """ Class that represents branch export job failed to complete successfully"""
     pass
 
 
-class BranchExportTimeout(Exception):
+class BranchExportTimeout(BranchError):
     """ Class that represents branch export job not completed under set timeout"""
     pass
 
 
-class BranchFatalRateLimitError(Exception):
+class BranchFatalRateLimitError(BranchError):
     """Non-retryable rate limit (retry too long)"""
     pass

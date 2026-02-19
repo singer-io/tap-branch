@@ -45,7 +45,7 @@ def handle_branch_validation_error(response: requests.Response):
         )
 
 
-def check_branch_rate_limit(response: requests.Response):
+def raise_for_branch_rate_limit(response: requests.Response):
 
     try:
         payload = response.json()

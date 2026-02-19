@@ -119,7 +119,7 @@ class TestClient(unittest.TestCase):
 
             expected_error_message = (f"HTTP-error-code: {error_code}, Error: {error_message}")
             self.assertEqual(str(e.exception), expected_error_message)
-            self.assertEqual(mock_request.call_count, 6)
+            self.assertEqual(mock_request.call_count, 7)
 
     @parameterized.expand([
         ["ConnectionResetError", ConnectionResetError],
@@ -134,7 +134,7 @@ class TestClient(unittest.TestCase):
             with self.assertRaises(error) as e:
                 self.client._Client__make_request("GET", "https://api.example.com/resource")
 
-            self.assertEqual(mock_request.call_count, 6)
+            self.assertEqual(mock_request.call_count, 7)
 
     @patch("tap_branch.branch_constants.JOB_TIMEOUT", 10)
     @patch("tap_branch.branch_constants.POLL_INTERVAL", 2)

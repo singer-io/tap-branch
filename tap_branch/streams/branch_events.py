@@ -1,4 +1,3 @@
-
 import gzip
 import io
 import json
@@ -13,6 +12,7 @@ from singer.transform import Transformer
 from tap_branch.branch_api_contract import BranchExportConfig, EndpointConfig
 from tap_branch.branch_constants import (BRANCH_EVENTS_SCHEMA,
                                          BRANCH_MAX_DATE_WINDOW, JOB_TIMEOUT)
+from tap_branch.exceptions import BranchError
 from tap_branch.streams.abstracts import IncrementalStream
 
 LOGGER = singer.get_logger()
@@ -38,27 +38,36 @@ class BranchEventsBaseStream(IncrementalStream):
 
         data_url = job_response["response_url"]
 
-        with requests.get(data_url, stream=True, timeout=JOB_TIMEOUT) as r:
-            r.raise_for_status()
+        try:
+            with requests.get(data_url, stream=True, timeout=JOB_TIMEOUT) as r:
+                r.raise_for_status()
 
-            with gzip.GzipFile(fileobj=r.raw) as gz:
-                reader = io.TextIOWrapper(gz, encoding="utf-8")
-                for line in reader:
-                    yield json.loads(line)
+                with gzip.GzipFile(fileobj=r.raw) as gz:
+                    reader = io.TextIOWrapper(gz, encoding="utf-8")
+                    line_num = 0
+                    for line in reader:
+                        line_num += 1
+                        try:
+                            yield json.loads(line)
+                        except json.JSONDecodeError as e:
+                            LOGGER.warning(f"Skipping malformed JSON at line {line_num}: {e}")
+                            continue
+
+        except Exception as e:
+            LOGGER.error(f"Failed to extract data from {data_url}: {e}")
+            raise BranchError(f"Data extraction failed: {e}")
 
     def get_window_configurations(self, export_start: pendulum.DateTime):
+        now = pendulum.now("UTC")  # Call once
         window_size = int(self.client.config.get("branch_window_size", BRANCH_MAX_DATE_WINDOW))
-        if window_size > 60:
-            LOGGER.info(f"Window size {window_size} is greater than 60, setting to max {BRANCH_MAX_DATE_WINDOW}")
+
+        if window_size > BRANCH_MAX_DATE_WINDOW:
+            LOGGER.warning(f"Window size {window_size} exceeds max {BRANCH_MAX_DATE_WINDOW}, capping")
             window_size = BRANCH_MAX_DATE_WINDOW
 
         export_end = export_start.add(days=window_size)
-        if export_end >= pendulum.now("UTC"):
-            export_end = pendulum.now("UTC")
-
-        export_end = export_end.replace(microsecond=0)
-
-        return export_end
+        export_end = min(export_end, now)
+        return export_end.replace(microsecond=0)
 
     def sync(self, state: Dict, transformer: Transformer, parent_obj: Dict = None):
 

@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 from parameterized import parameterized
 
 from tap_branch.branch_constants import MAX_RETRY_WAIT_SECONDS
-from tap_branch.branch_utils import (check_branch_rate_limit,
+from tap_branch.branch_utils import (raise_for_branch_rate_limit,
                                      handle_branch_validation_error)
 from tap_branch.exceptions import (BranchFatalRateLimitError,
                                    BranchRateLimitError,
@@ -19,7 +19,7 @@ class TestUtils(unittest.TestCase):
         mock_response = MagicMock()
         mock_response.json.return_value = {
             "errors": [
-                {"message": "field 'test_field' is not available for exports"}
+                {"message": "test_field field is not available for exports"}
             ]
         }
 
@@ -42,6 +42,6 @@ class TestUtils(unittest.TestCase):
         }
 
         with self.assertRaises(expected_exception) as context:
-            check_branch_rate_limit(mock_response)
+            raise_for_branch_rate_limit(mock_response)
 
         self.assertEqual(str(context.exception), expected_message)

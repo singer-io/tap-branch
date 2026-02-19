@@ -11,7 +11,7 @@ BRANCH_MAX_DATE_WINDOW = 60
 JOB_TIMEOUT = 60 * 60
 POLL_INTERVAL = 60 * 2
 
-MAX_RETRY_WAIT_SECONDS = 60
+MAX_RETRY_WAIT_SECONDS = 120  # Wait for a retry period of 2 minutes.
 MAX_RECORDS_TO_FETCH = 1_000_000
 
 BASE_DIR = Path(__file__).resolve().parent
