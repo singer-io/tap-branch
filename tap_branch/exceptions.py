@@ -47,22 +47,27 @@ class BranchRateLimitError(BranchBackoffError):
     pass
 
 
-class BranchInternalServerError(BranchBackoffError):
+class BranchServer5xxError(BranchError):
+    """ class representing all server error codes """
+    pass
+
+
+class BranchInternalServerError(BranchServer5xxError):
     """class representing 500 status code."""
     pass
 
 
-class BranchNotImplementedError(BranchBackoffError):
+class BranchNotImplementedError(BranchServer5xxError):
     """class representing 501 status code."""
     pass
 
 
-class BranchBadGatewayError(BranchBackoffError):
+class BranchBadGatewayError(BranchServer5xxError):
     """class representing 502 status code."""
     pass
 
 
-class BranchServiceUnavailableError(BranchBackoffError):
+class BranchServiceUnavailableError(BranchServer5xxError):
     """class representing 503 status code."""
     pass
 

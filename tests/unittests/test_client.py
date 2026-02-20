@@ -1,11 +1,12 @@
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, Mock
 
 import pendulum
 import requests
 from parameterized import parameterized
 from requests.exceptions import ChunkedEncodingError, ConnectionError, Timeout
 
+from tap_branch.branch_constants import MAX_RETRY_WAIT_SECONDS
 from tap_branch.client import Client
 from tap_branch.exceptions import *
 
@@ -104,7 +105,6 @@ class TestClient(unittest.TestCase):
         self.assertEqual(str(e.exception), expected_error_message)
 
     @parameterized.expand([
-        ["429 error", 429, MockResponse(429), BranchRateLimitError, "The API rate limit for your organisation/application pairing has been exceeded."],
         ["500 error", 500, MockResponse(500), BranchInternalServerError, "The server encountered an unexpected condition which prevented it from fulfilling the request."],
         ["501 error", 501, MockResponse(501), BranchNotImplementedError, "The server does not support the functionality required to fulfill the request."],
         ["502 error", 502, MockResponse(502), BranchBadGatewayError, "Server received an invalid response."],
@@ -226,3 +226,29 @@ class TestClient(unittest.TestCase):
         self.assertEqual(ctx.exception.fields, ["field1", "field2"])
 
         self.assertEqual(mock_make_request.call_count, 2)
+
+
+class TestRateLimitWaitGenerator(unittest.TestCase):
+    """Test cases for the rate_limit_wait_gen function"""
+
+    @parameterized.expand([
+        ["with retry seconds", BranchRateLimitError, "Limit exceeded, retry after 300 seconds", 300],
+        ["caps at max wait", BranchRateLimitError, "Limit exceeded, retry after 1000 seconds", MAX_RETRY_WAIT_SECONDS],
+        ["fallback to max", BranchRateLimitError, "Rate limit exceeded", MAX_RETRY_WAIT_SECONDS],
+        ["None exception", None, None, MAX_RETRY_WAIT_SECONDS]
+    ])
+    def test_rate_limit_wait_gen_with_retry_seconds(self, test_name, exception_class, exception_message, retry_seconds):
+        """Test that the generator is called with specific exception and return the appropriate retry seconds"""
+        gen = Client.rate_limit_wait_gen()
+        next(gen)  # Prime the generator
+
+        mock_exc = None
+
+        # Create a mock exception with exception message
+        if exception_class:
+            mock_exc = exception_class(exception_message)
+
+        wait_time = gen.send(mock_exc)
+
+        # Should return retry_seconds for the specific Exception classes and error message
+        self.assertEqual(wait_time, retry_seconds)

@@ -5,11 +5,11 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 import pendulum
-import requests
 from parameterized import parameterized
+from requests.exceptions import ChunkedEncodingError, ConnectionError, Timeout
 
 from tap_branch.branch_api_contract import EndpointConfig
-from tap_branch.branch_constants import BRANCH_MAX_DATE_WINDOW, JOB_TIMEOUT
+from tap_branch.branch_constants import MAX_BRANCH_DATE_WINDOW
 from tap_branch.exceptions import BranchError
 from tap_branch.streams.branch_events import BranchEventsBaseStream
 
@@ -65,8 +65,8 @@ class TestBranchEventsBaseStream(unittest.TestCase):
         self.assertEqual(self.stream.endpoint_config.required_query_params, {"app_id"})
         self.assertEqual(self.stream.endpoint_config.required_headers, {"Access-Token"})
 
-    @patch("requests.get")
-    def test_extract_data_success(self, mock_requests_get):
+    @patch("tap_branch.streams.branch_events.BranchEventsBaseStream._fetch_export_data")
+    def test_extract_data_success(self, mock_fetch):
         """Test successful data extraction from gzipped response."""
         # Create mock gzipped data
         test_data = [
@@ -84,8 +84,9 @@ class TestBranchEventsBaseStream(unittest.TestCase):
         # Mock the response
         mock_response = MagicMock()
         mock_response.raw = gzipped_content
-        mock_response.raise_for_status = MagicMock()
-        mock_requests_get.return_value.__enter__.return_value = mock_response
+        mock_response.__enter__ = MagicMock(return_value=mock_response)
+        mock_response.__exit__ = MagicMock(return_value=False)
+        mock_fetch.return_value = mock_response
 
         # Test extraction
         job_response = {"response_url": "https://test.url/data.gz"}
@@ -94,18 +95,12 @@ class TestBranchEventsBaseStream(unittest.TestCase):
         self.assertEqual(len(extracted_records), 2)
         self.assertEqual(extracted_records[0]["id"], "event1")
         self.assertEqual(extracted_records[1]["id"], "event2")
-        mock_requests_get.assert_called_once_with(
-            "https://test.url/data.gz",
-            stream=True,
-            timeout=JOB_TIMEOUT
-        )
+        mock_fetch.assert_called_once_with("https://test.url/data.gz")
 
-    @patch("requests.get")
-    def test_extract_data_raises_http_error(self, mock_requests_get):
+    @patch("tap_branch.streams.branch_events.BranchEventsBaseStream._fetch_export_data")
+    def test_extract_data_raises_http_error(self, mock_fetch):
         """Test that extract_data raises an error when HTTP request fails."""
-        mock_response = MagicMock()
-        mock_response.raise_for_status.side_effect = BranchError("Malformed response")
-        mock_requests_get.return_value.__enter__.return_value = mock_response
+        mock_fetch.side_effect = BranchError("Malformed response")
 
         job_response = {"response_url": "https://test.url/data.gz"}
 
@@ -141,7 +136,7 @@ class TestBranchEventsBaseStream(unittest.TestCase):
         export_end = self.stream.get_window_configurations(export_start)
 
         # Should be capped at 60 days
-        expected_end = export_start.add(days=BRANCH_MAX_DATE_WINDOW)
+        expected_end = export_start.add(days=MAX_BRANCH_DATE_WINDOW)
         self.assertEqual(export_end, expected_end)
 
     @patch("pendulum.now")
@@ -456,8 +451,8 @@ class TestBranchEventsBaseStream(unittest.TestCase):
             self.mock_client.config["branch_app_id"]
         )
 
-    @patch("requests.get")
-    def test_extract_data_empty_response(self, mock_requests_get):
+    @patch("tap_branch.streams.branch_events.BranchEventsBaseStream._fetch_export_data")
+    def test_extract_data_empty_response(self, mock_fetch):
         """Test extract_data with empty gzipped response."""
         # Create empty gzipped content
         gzipped_content = io.BytesIO()
@@ -467,10 +462,76 @@ class TestBranchEventsBaseStream(unittest.TestCase):
 
         mock_response = MagicMock()
         mock_response.raw = gzipped_content
-        mock_response.raise_for_status = MagicMock()
-        mock_requests_get.return_value.__enter__.return_value = mock_response
+        mock_response.__enter__ = MagicMock(return_value=mock_response)
+        mock_response.__exit__ = MagicMock(return_value=False)
+        mock_fetch.return_value = mock_response
 
         job_response = {"response_url": "https://test.url/data.gz"}
         extracted_records = list(self.stream.extract_data(job_response))
 
         self.assertEqual(len(extracted_records), 0)
+
+
+class TestExtractDataRetryLogic(unittest.TestCase):
+    """Test suite for extract_data retry logic with backoff decorator."""
+
+    @parameterized.expand([
+        ["connection_reset_error", ConnectionResetError, "Connection reset"],
+        ["connection_error", ConnectionError, "Connection failed"],
+        ["timeout", Timeout, "Request timeout"],
+        ["chunked_encoding_error", ChunkedEncodingError, "Chunked encoding error"],
+    ])
+    @patch("tap_branch.streams.branch_events.BranchEventsBaseStream._fetch_export_data")
+    def test_fetch_export_data_reraises_network_errors(self, test_name, exception_class, 
+                                                        error_message, mock_fetch):
+        """Test that _fetch_export_data re-raises network exceptions for backoff to handle."""
+        # Disable backoff for this unit test
+        with patch("tap_branch.streams.branch_events.backoff.on_exception", lambda *args, **kwargs: lambda f: f):
+            mock_fetch.side_effect = exception_class(error_message)
+
+            job_response = {"response_url": "https://test.url/data.gz"}
+
+            # Network errors should be re-raised
+            with self.assertRaises(exception_class):
+                list(BranchEventsBaseStream.extract_data(job_response))
+
+    @patch("tap_branch.streams.branch_events.BranchEventsBaseStream._fetch_export_data")
+    def test_extract_data_wraps_non_network_errors_in_branch_error(self, mock_fetch):
+        """Test that non-network exceptions are wrapped in BranchError."""
+        mock_response = MagicMock()
+        mock_response.__enter__ = MagicMock(side_effect=ValueError("Unexpected error"))
+        mock_fetch.return_value = mock_response
+
+        job_response = {"response_url": "https://test.url/data.gz"}
+
+        with self.assertRaises(BranchError) as cm:
+            list(BranchEventsBaseStream.extract_data(job_response))
+
+        self.assertIn("Data extraction failed", str(cm.exception))
+
+    @patch("tap_branch.streams.branch_events.BranchEventsBaseStream._fetch_export_data")
+    def test_extract_data_successful_with_valid_data(self, mock_fetch):
+        """Test successful data extraction with valid gzipped data."""
+        # Create mock gzipped data
+        test_data = [
+            {"id": "event1", "timestamp": "2024-01-01T00:00:00Z"},
+            {"id": "event2", "timestamp": "2024-01-02T00:00:00Z"}
+        ]
+        gzipped_content = io.BytesIO()
+        with gzip.GzipFile(fileobj=gzipped_content, mode='wb') as gz:
+            for record in test_data:
+                gz.write((json.dumps(record) + '\n').encode('utf-8'))
+        gzipped_content.seek(0)
+
+        mock_response = MagicMock()
+        mock_response.raw = gzipped_content
+        mock_response.__enter__ = MagicMock(return_value=mock_response)
+        mock_response.__exit__ = MagicMock(return_value=False)
+        mock_fetch.return_value = mock_response
+
+        job_response = {"response_url": "https://test.url/data.gz"}
+        extracted_records = list(BranchEventsBaseStream.extract_data(job_response))
+
+        self.assertEqual(len(extracted_records), 2)
+        self.assertEqual(extracted_records[0]["id"], "event1")
+        self.assertEqual(extracted_records[1]["id"], "event2")

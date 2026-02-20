@@ -14,12 +14,13 @@ from tap_branch.branch_api_contract import (BranchDataReadyPayload,
                                             BranchExportJobPayload,
                                             EndpointConfig)
 from tap_branch.branch_constants import (JOB_TIMEOUT, MAX_RECORDS_TO_FETCH,
-                                         POLL_INTERVAL)
-from tap_branch.branch_utils import (raise_for_branch_rate_limit,
-                                     handle_branch_validation_error)
-from tap_branch.exceptions import (ERROR_CODE_EXCEPTION_MAPPING,
-                                   BranchBackoffError, BranchError,
-                                   BranchExportFailed, BranchExportTimeout, BranchRateLimitError,
+                                         MAX_RETRY_WAIT_SECONDS, POLL_INTERVAL)
+from tap_branch.branch_utils import (extract_retry_seconds,
+                                     handle_branch_validation_error,
+                                     raise_for_branch_rate_limit)
+from tap_branch.exceptions import (ERROR_CODE_EXCEPTION_MAPPING, BranchError,
+                                   BranchExportFailed, BranchExportTimeout,
+                                   BranchRateLimitError, BranchServer5xxError,
                                    BranchUnsupportedFieldsError)
 
 LOGGER = get_logger()
@@ -52,6 +53,10 @@ def raise_for_error(response: requests.Response) -> None:
         exc = ERROR_CODE_EXCEPTION_MAPPING.get(response.status_code, {}).get(
             "raise_exception", BranchError
         )
+
+        if response.status_code > 500 and response.status_code not in ERROR_CODE_EXCEPTION_MAPPING.keys():
+            exc = BranchServer5xxError
+
         raise exc(message, response) from None
 
 
@@ -159,6 +164,41 @@ class Client:
             timeout=self.request_timeout
         )
 
+    def is_not_status_code_fn(status_code):
+        """Check for status code"""
+
+        def gen_fn(exc):
+            if getattr(exc, "code", None) and exc.code not in status_code:
+                return True
+            # Retry other errors up to the max
+            return False
+        return gen_fn
+
+    def rate_limit_wait_gen(**kwargs):
+        """Backoff wait generator for rate-limit retries.
+
+        This generator extracts the retry seconds from the exception message and
+        yields the appropriate wait time for backoff to use.
+        """
+        retry_details = yield  # prime the generator (backoff calls next() first)
+        while True:
+            # backoff sends exception object directly, not in a dict
+            exc = retry_details if isinstance(retry_details, Exception) else None
+            retry_seconds = extract_retry_seconds(str(exc)) if exc else None
+            if retry_seconds is not None:
+                wait_time = min(retry_seconds, MAX_RETRY_WAIT_SECONDS)
+            else:
+                wait_time = MAX_RETRY_WAIT_SECONDS
+            LOGGER.info("Rate limit wait: %s seconds", wait_time)
+            retry_details = yield wait_time
+
+    @backoff.on_exception(
+            wait_gen=rate_limit_wait_gen,
+            exception=BranchRateLimitError,
+            jitter=None,
+            giveup=is_not_status_code_fn([429]),
+            max_tries=3
+    )
     @backoff.on_exception(
         wait_gen=backoff.expo,
         exception=(
@@ -166,8 +206,7 @@ class Client:
             ConnectionError,
             ChunkedEncodingError,
             Timeout,
-            BranchBackoffError,
-            BranchRateLimitError
+            BranchServer5xxError
         ),
         max_tries=7,
         factor=2,

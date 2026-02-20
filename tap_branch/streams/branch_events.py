@@ -3,15 +3,17 @@ import io
 import json
 from typing import Dict
 
+import backoff
 import pendulum
 import requests
 import singer
+from requests.exceptions import ChunkedEncodingError, ConnectionError, Timeout
 from singer import bookmarks, metrics, write_record
 from singer.transform import Transformer
 
 from tap_branch.branch_api_contract import BranchExportConfig, EndpointConfig
-from tap_branch.branch_constants import (BRANCH_EVENTS_SCHEMA,
-                                         BRANCH_MAX_DATE_WINDOW, JOB_TIMEOUT)
+from tap_branch.branch_constants import (BRANCH_EVENTS_SCHEMA, JOB_TIMEOUT,
+                                         MAX_BRANCH_DATE_WINDOW)
 from tap_branch.exceptions import BranchError
 from tap_branch.streams.abstracts import IncrementalStream
 
@@ -34,14 +36,37 @@ class BranchEventsBaseStream(IncrementalStream):
     )
 
     @staticmethod
+    @backoff.on_exception(
+        wait_gen=backoff.expo,
+        exception=(
+            ConnectionResetError,
+            ConnectionError,
+            ChunkedEncodingError,
+            Timeout
+        ),
+        max_tries=5,
+        factor=2,
+    )
+    def _fetch_export_data(data_url: str):
+        """Fetch gzipped export data from URL with retry logic.
+
+        This is a separate function so backoff decorator can properly retry
+        network failures, since extract_data is a generator.
+        """
+        response = requests.get(data_url, stream=True, timeout=JOB_TIMEOUT)
+        response.raise_for_status()
+        return response
+
+    @staticmethod
     def extract_data(job_response: Dict):
 
         data_url = job_response["response_url"]
 
         try:
-            with requests.get(data_url, stream=True, timeout=JOB_TIMEOUT) as r:
-                r.raise_for_status()
+            # Use helper function with backoff for network request
+            r = BranchEventsBaseStream._fetch_export_data(data_url)
 
+            with r:
                 with gzip.GzipFile(fileobj=r.raw) as gz:
                     reader = io.TextIOWrapper(gz, encoding="utf-8")
                     line_num = 0
@@ -53,17 +78,21 @@ class BranchEventsBaseStream(IncrementalStream):
                             LOGGER.warning(f"Skipping malformed JSON at line {line_num}: {e}")
                             continue
 
+        except (ConnectionResetError, ConnectionError, ChunkedEncodingError, Timeout):
+            # Re-raise network errors (already handled by backoff in _fetch_export_data)
+            raise
+
         except Exception as e:
             LOGGER.error(f"Failed to extract data from {data_url}: {e}")
-            raise BranchError(f"Data extraction failed: {e}")
+            raise BranchError(f"Data extraction failed: {e}") from e
 
     def get_window_configurations(self, export_start: pendulum.DateTime):
         now = pendulum.now("UTC")  # Call once
-        window_size = int(self.client.config.get("branch_window_size", BRANCH_MAX_DATE_WINDOW))
+        window_size = int(self.client.config.get("branch_window_size", MAX_BRANCH_DATE_WINDOW))
 
-        if window_size > BRANCH_MAX_DATE_WINDOW:
-            LOGGER.warning(f"Window size {window_size} exceeds max {BRANCH_MAX_DATE_WINDOW}, capping")
-            window_size = BRANCH_MAX_DATE_WINDOW
+        if window_size > MAX_BRANCH_DATE_WINDOW:
+            LOGGER.warning(f"Window size {window_size} exceeds max {MAX_BRANCH_DATE_WINDOW}, capping")
+            window_size = MAX_BRANCH_DATE_WINDOW
 
         export_end = export_start.add(days=window_size)
         export_end = min(export_end, now)
