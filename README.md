@@ -65,6 +65,7 @@ This tap:
     - `branch_access_token`: Your Branch Access Token
     - `branch_key`: Your Branch Key
     - `branch_secret`: Your Branch Secret
+    - `branch_window_size`: Window size to export reports. Note: Max allowed window size is of 60 days
     - `deeplink_urls`: A string of comma seperated deeplink urls to extract data for
     - `start_date`: The start date for data extraction in ISO 8601 format
 
@@ -74,6 +75,7 @@ This tap:
     "branch_access_token": "branch-access-token",
     "branch_key": "branch-key",
     "branch_secret": "branch-secret",
+    "branch_window_size": 30,
     "deeplink_urls": "deeplink-url-1, deeplink-url-2",
     "start_date": "2023-01-01T00:00:00Z"
     }

@@ -75,7 +75,7 @@ class BranchEventsBaseStream(IncrementalStream):
                         try:
                             yield json.loads(line)
                         except json.JSONDecodeError as e:
-                            LOGGER.warning(f"Skipping malformed JSON at line {line_num}: {e}")
+                            LOGGER.warning("Skipping malformed JSON at line %s: %s", line_num, e)
                             continue
 
         except (ConnectionResetError, ConnectionError, ChunkedEncodingError, Timeout):
@@ -83,7 +83,7 @@ class BranchEventsBaseStream(IncrementalStream):
             raise
 
         except Exception as e:
-            LOGGER.error(f"Failed to extract data from {data_url}: {e}")
+            LOGGER.error("Failed to extract data from %s: %s", data_url, e)
             raise BranchError(f"Data extraction failed: {e}") from e
 
     def get_window_configurations(self, export_start: pendulum.DateTime):
@@ -91,12 +91,12 @@ class BranchEventsBaseStream(IncrementalStream):
         window_size = int(self.client.config.get("branch_window_size", MAX_BRANCH_DATE_WINDOW))
 
         if window_size > MAX_BRANCH_DATE_WINDOW:
-            LOGGER.warning(f"Window size {window_size} exceeds max {MAX_BRANCH_DATE_WINDOW}, capping")
+            LOGGER.warning("Window size %s exceeds max %s, capping", window_size, MAX_BRANCH_DATE_WINDOW)
             window_size = MAX_BRANCH_DATE_WINDOW
 
         export_end = export_start.add(days=window_size)
         export_end = min(export_end, now)
-        return export_end.replace(microsecond=0)
+        return export_end
 
     def sync(self, state: Dict, transformer: Transformer, parent_obj: Dict = None):
 
@@ -129,7 +129,7 @@ class BranchEventsBaseStream(IncrementalStream):
                                                           report_type=report_type,
                                                           api_config=data_ready_api_config)
             if data_ready is False:
-                LOGGER.info(f"Data is not ready for the time period {export_start} against the report_type {report_type}")
+                LOGGER.info("Data is not ready for the time period %s against the report_type %s", export_start, report_type)
                 return 0
 
             job_start = pendulum.now("UTC")
@@ -138,7 +138,7 @@ class BranchEventsBaseStream(IncrementalStream):
             while export_start < job_start:
 
                 window_end = self.get_window_configurations(export_start=export_start)
-                LOGGER.info(f"Initiating export job for the time period {export_start} to {window_end} against the report_type {report_type}")
+                LOGGER.info("Initiating export job for the time period %s to %s against the report_type %s", export_start, window_end, report_type)
 
                 create_export_api_config = BranchExportConfig(
                                             method="POST",
@@ -165,6 +165,7 @@ class BranchEventsBaseStream(IncrementalStream):
 
                 # Finally get the export job response and yield records
                 if is_export_ready:
+                    batch_record_counter = 0
                     for record in self.extract_data(job_response=export_job_response):
                         transformed_record = transformer.transform(
                             record, self.schema, self.metadata
@@ -174,12 +175,14 @@ class BranchEventsBaseStream(IncrementalStream):
                             if self.is_selected():
                                 write_record(self.tap_stream_id, transformed_record)
                                 counter.increment()
+                                batch_record_counter += 1
 
                             max_bookmark = max(max_bookmark, record_bookmark)
 
                     # Once done with the extraction of the current batch, update the bookmark
                     state = bookmarks.write_bookmark(state=state, tap_stream_id=self.tap_stream_id,
                                                      key=replication_key, val=max_bookmark.to_iso8601_string())
+                    LOGGER.info("Processed %s records for the time period %s to %s against the report_type %s", batch_record_counter, export_start, window_end, report_type)
                     # Write the state file
                     singer.write_state(state)
 

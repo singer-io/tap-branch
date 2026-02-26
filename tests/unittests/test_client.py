@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import MagicMock, patch, Mock
+from unittest.mock import MagicMock, patch
 
 import pendulum
 import requests
@@ -7,7 +7,7 @@ from parameterized import parameterized
 from requests.exceptions import ChunkedEncodingError, ConnectionError, Timeout
 
 from tap_branch.branch_constants import MAX_RETRY_WAIT_SECONDS
-from tap_branch.client import Client
+from tap_branch.client import Client, rate_limit_wait_gen
 from tap_branch.exceptions import *
 
 default_config = {
@@ -239,7 +239,7 @@ class TestRateLimitWaitGenerator(unittest.TestCase):
     ])
     def test_rate_limit_wait_gen_with_retry_seconds(self, test_name, exception_class, exception_message, retry_seconds):
         """Test that the generator is called with specific exception and return the appropriate retry seconds"""
-        gen = Client.rate_limit_wait_gen()
+        gen = rate_limit_wait_gen()
         next(gen)  # Prime the generator
 
         mock_exc = None

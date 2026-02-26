@@ -23,6 +23,15 @@ def extract_retry_seconds(message):
 
 
 def handle_branch_validation_error(response: requests.Response):
+    """ Function to check and extract unsupported fields in branch export request
+
+    Args:
+        response (requests.Response): Response object
+
+    Raises:
+        BranchUnsupportedFieldsError: Raised with proper fields data
+    """
+
     try:
         payload = response.json()
     except ValueError:
@@ -46,6 +55,15 @@ def handle_branch_validation_error(response: requests.Response):
 
 
 def raise_for_branch_rate_limit(response: requests.Response):
+    """ Function to detect and raise appropriate branch rate-limit error
+
+    Args:
+        response (requests.Response): Response object
+
+    Raises:
+        BranchFatalRateLimitError: Raised when wait time exceeds configured limit
+        BranchRateLimitError: Raised when wait time is under the configured limit
+    """
 
     try:
         payload = response.json()
