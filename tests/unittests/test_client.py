@@ -7,7 +7,7 @@ from parameterized import parameterized
 from requests.exceptions import ChunkedEncodingError, ConnectionError, Timeout
 
 from tap_branch.branch_constants import MAX_RETRY_WAIT_SECONDS
-from tap_branch.client import Client, rate_limit_wait_gen
+from tap_branch.client import Client, raise_for_error, rate_limit_wait_gen
 from tap_branch.exceptions import *
 
 default_config = {
@@ -252,3 +252,32 @@ class TestRateLimitWaitGenerator(unittest.TestCase):
 
         # Should return retry_seconds for the specific Exception classes and error message
         self.assertEqual(wait_time, retry_seconds)
+
+
+class TestRaiseForErrorBoundaryValues(unittest.TestCase):
+    """Boundary value tests for raise_for_error to verify correct exception
+    mapping at the edges of the 5xx status code range."""
+
+    def _make_response(self, status_code):
+        mock_response = MagicMock()
+        mock_response.status_code = status_code
+        mock_response.json.return_value = {}
+        return mock_response
+
+    @parameterized.expand([
+        # Below 5xx range — default BranchError, no retry
+        ["status_499", 499, BranchError],
+        # Mapped 5xx — specific exception from ERROR_CODE_EXCEPTION_MAPPING
+        ["status_500", 500, BranchInternalServerError],
+        ["status_503", 503, BranchServiceUnavailableError],
+        # Unmapped 5xx inside range — BranchServer5xxError (retried)
+        ["status_504", 504, BranchServer5xxError],
+        ["status_550", 550, BranchServer5xxError],
+        ["status_599", 599, BranchServer5xxError],
+        # Above 5xx range — default BranchError, no retry
+        ["status_600", 600, BranchError],
+    ])
+    def test_raise_for_error_boundary_status_codes(self, test_name, status_code, expected_exception):
+        """Test that the correct exception is raised at 5xx range boundaries."""
+        with self.assertRaises(expected_exception):
+            raise_for_error(self._make_response(status_code))

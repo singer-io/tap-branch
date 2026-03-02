@@ -54,7 +54,7 @@ def raise_for_error(response: requests.Response) -> None:
             "raise_exception", BranchError
         )
 
-        if response.status_code > 500 and response.status_code not in ERROR_CODE_EXCEPTION_MAPPING.keys():
+        if 500 < response.status_code < 600 and response.status_code not in ERROR_CODE_EXCEPTION_MAPPING.keys():
             exc = BranchServer5xxError
 
         raise exc(message, response) from None
