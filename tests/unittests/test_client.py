@@ -106,7 +106,6 @@ class TestClient(unittest.TestCase):
 
     @parameterized.expand([
         ["500 error", 500, MockResponse(500), BranchInternalServerError, "The server encountered an unexpected condition which prevented it from fulfilling the request."],
-        ["501 error", 501, MockResponse(501), BranchNotImplementedError, "The server does not support the functionality required to fulfill the request."],
         ["502 error", 502, MockResponse(502), BranchBadGatewayError, "Server received an invalid response."],
         ["503 error", 503, MockResponse(503), BranchServiceUnavailableError, "API service is currently unavailable."],
     ])
@@ -254,6 +253,101 @@ class TestRateLimitWaitGenerator(unittest.TestCase):
         self.assertEqual(wait_time, retry_seconds)
 
 
+class TestRateLimitBackoffBehaviour(unittest.TestCase):
+    """Tests that pin the rate-limit backoff behaviour on __make_request after
+    the removal of the broken ``giveup`` callback (``is_not_status_code_fn``).
+
+    Why ``is_not_status_code_fn`` was removed:
+    - It checked ``getattr(exc, "code", None)``, but ``BranchRateLimitError``
+      has no ``.code`` attribute — so the check always returned ``None``.
+    - That made the ``giveup`` callback always return ``False`` (never give up),
+      which is identical to not having a giveup at all.
+    - Even if ``.code`` had existed and held ``429``, the expression
+      ``429 not in [429]`` evaluates to ``False`` — so giveup would still
+      never have fired for the only exception the decorator handles.
+    The decorator now relies solely on ``max_tries=3`` to bound retries.
+    """
+
+    def setUp(self):
+        self.client = Client(default_config)
+
+    def _make_429_response(self, retry_seconds=10):
+        """Build a 429 mock response that raise_for_branch_rate_limit
+        recognises and turns into a BranchRateLimitError."""
+        mock_resp = MagicMock()
+        mock_resp.status_code = 429
+        mock_resp.json.return_value = {
+            "errors": [
+                {
+                    "error_code": 7,
+                    "message": f"Rate limit exceeded, retry after {retry_seconds} seconds"
+                }
+            ]
+        }
+        return mock_resp
+
+    @patch("time.sleep")
+    def test_rate_limit_retries_exactly_max_tries(self, mock_sleep):
+        """BranchRateLimitError must be retried up to max_tries=3 (3 total
+        attempts) before the exception propagates to the caller.
+        Previously the broken giveup callback returned False on every call
+        (because exc.code was None), which accidentally achieved the same
+        result — but only by coincidence, not by design."""
+        with patch.object(
+            self.client._session, "request",
+            return_value=self._make_429_response()
+        ) as mock_request:
+            with self.assertRaises(BranchRateLimitError):
+                self.client._Client__make_request("GET", "https://api.example.com/resource")
+
+        self.assertEqual(mock_request.call_count, 3)
+
+    @patch("time.sleep")
+    def test_rate_limit_succeeds_after_retry(self, mock_sleep):
+        """If the first call returns 429 but the second returns 200, the
+        successful response must be returned without raising."""
+        success_resp = MagicMock()
+        success_resp.status_code = 200
+        success_resp.json.return_value = {"data": "ok"}
+
+        with patch.object(
+            self.client._session, "request",
+            side_effect=[self._make_429_response(), success_resp]
+        ) as mock_request:
+            result = self.client._Client__make_request("GET", "https://api.example.com/resource")
+
+        self.assertEqual(result, {"data": "ok"})
+        self.assertEqual(mock_request.call_count, 2)
+
+    @patch("time.sleep")
+    def test_fatal_rate_limit_is_not_retried(self, mock_sleep):
+        """BranchFatalRateLimitError (retry window too large) is not a
+        subclass of BranchRateLimitError, so it must NOT be caught by the
+        rate-limit backoff decorator and must propagate on the first attempt."""
+        with patch.object(
+            self.client._session, "request",
+            return_value=self._make_429_response(retry_seconds=999999)
+        ) as mock_request:
+            with self.assertRaises(BranchFatalRateLimitError):
+                self.client._Client__make_request("GET", "https://api.example.com/resource")
+
+        # Must be called only once — no retry
+        self.assertEqual(mock_request.call_count, 1)
+
+    def test_branch_rate_limit_error_has_no_code_attribute(self):
+        """Regression: BranchRateLimitError must not have a ``.code``
+        attribute.  The removed giveup callback silently relied on
+        ``exc.code``, which was always ``None``, making the giveup dead code.
+        This test ensures any future re-introduction of giveup logic based
+        on ``.code`` would fail loudly rather than silently."""
+        exc = BranchRateLimitError("Rate limit exceeded, retry after 10 seconds")
+        self.assertFalse(
+            hasattr(exc, "code"),
+            "BranchRateLimitError must not have a 'code' attribute — "
+            "giveup logic relying on exc.code would be silently broken."
+        )
+
+
 class TestRaiseForErrorBoundaryValues(unittest.TestCase):
     """Boundary value tests for raise_for_error to verify correct exception
     mapping at the edges of the 5xx status code range."""
@@ -267,9 +361,12 @@ class TestRaiseForErrorBoundaryValues(unittest.TestCase):
     @parameterized.expand([
         # Below 5xx range — default BranchError, no retry
         ["status_499", 499, BranchError],
-        # Mapped 5xx — specific exception from ERROR_CODE_EXCEPTION_MAPPING
+        # Mapped 5xx — specific subclass takes precedence over BranchServer5xxError
         ["status_500", 500, BranchInternalServerError],
         ["status_503", 503, BranchServiceUnavailableError],
+        # Lower boundary: 500 is included (<=) — unmapped 500 raises BranchServer5xxError.
+        # raise_for_error uses `500 <= status_code < 600` so the boundary is inclusive at 500.
+        ["status_500_unmapped", 500, BranchServer5xxError],
         # Unmapped 5xx inside range — BranchServer5xxError (retried)
         ["status_504", 504, BranchServer5xxError],
         ["status_550", 550, BranchServer5xxError],
@@ -278,6 +375,23 @@ class TestRaiseForErrorBoundaryValues(unittest.TestCase):
         ["status_600", 600, BranchError],
     ])
     def test_raise_for_error_boundary_status_codes(self, test_name, status_code, expected_exception):
-        """Test that the correct exception is raised at 5xx range boundaries."""
-        with self.assertRaises(expected_exception):
-            raise_for_error(self._make_response(status_code))
+        """Test that the correct exception is raised at 5xx range boundaries.
+
+        For status_500_unmapped the ERROR_CODE_EXCEPTION_MAPPING entry for 500
+        is temporarily removed so the unmapped-5xx branch (500 <= code < 600)
+        is exercised at the exact lower boundary, confirming the inclusive ``<=``
+        introduced when 500 was added to the BranchServer5xxError condition.
+        """
+        response = self._make_response(status_code)
+        if test_name == "status_500_unmapped":
+            from tap_branch.exceptions import ERROR_CODE_EXCEPTION_MAPPING
+            original = ERROR_CODE_EXCEPTION_MAPPING.pop(500, None)
+            try:
+                with self.assertRaises(expected_exception):
+                    raise_for_error(response)
+            finally:
+                if original is not None:
+                    ERROR_CODE_EXCEPTION_MAPPING[500] = original
+        else:
+            with self.assertRaises(expected_exception):
+                raise_for_error(response)

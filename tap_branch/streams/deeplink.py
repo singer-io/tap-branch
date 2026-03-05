@@ -1,4 +1,3 @@
-import ast
 from typing import Dict
 
 from singer import metrics, write_record
@@ -48,10 +47,7 @@ class DeepLink(FullTableStream):
 
         raw_deeplink_urls = [url.strip() for url in deeplink_urls.split(",")]
 
-        if isinstance(raw_deeplink_urls, str):
-            deeplink_urls = ast.literal_eval(raw_deeplink_urls)
-        else:
-            deeplink_urls = raw_deeplink_urls
+        deeplink_urls = raw_deeplink_urls
 
         # Set the required headers
         headers = self.client.build_headers(endpoint_config=self.endpoint_config, headers_data={"Accept": "application/json"})

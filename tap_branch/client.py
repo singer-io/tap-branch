@@ -54,21 +54,10 @@ def raise_for_error(response: requests.Response) -> None:
             "raise_exception", BranchError
         )
 
-        if 500 < response.status_code < 600 and response.status_code not in ERROR_CODE_EXCEPTION_MAPPING.keys():
+        if 500 <= response.status_code < 600 and response.status_code not in ERROR_CODE_EXCEPTION_MAPPING.keys():
             exc = BranchServer5xxError
 
         raise exc(message, response) from None
-
-
-def is_not_status_code_fn(status_code):
-    """Check for status code"""
-
-    def gen_fn(exc):
-        if getattr(exc, "code", None) and exc.code not in status_code:
-            return True
-        # Retry other errors up to the max
-        return False
-    return gen_fn
 
 
 def rate_limit_wait_gen(**kwargs):
@@ -198,7 +187,6 @@ class Client:
             wait_gen=rate_limit_wait_gen,
             exception=BranchRateLimitError,
             jitter=None,
-            giveup=is_not_status_code_fn([429]),
             max_tries=3
     )
     @backoff.on_exception(
