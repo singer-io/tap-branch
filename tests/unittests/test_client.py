@@ -364,9 +364,6 @@ class TestRaiseForErrorBoundaryValues(unittest.TestCase):
         # Mapped 5xx — specific subclass takes precedence over BranchServer5xxError
         ["status_500", 500, BranchInternalServerError],
         ["status_503", 503, BranchServiceUnavailableError],
-        # Lower boundary: 500 is included (<=) — unmapped 500 raises BranchServer5xxError.
-        # raise_for_error uses `500 <= status_code < 600` so the boundary is inclusive at 500.
-        ["status_500_unmapped", 500, BranchServer5xxError],
         # Unmapped 5xx inside range — BranchServer5xxError (retried)
         ["status_504", 504, BranchServer5xxError],
         ["status_550", 550, BranchServer5xxError],
@@ -375,23 +372,24 @@ class TestRaiseForErrorBoundaryValues(unittest.TestCase):
         ["status_600", 600, BranchError],
     ])
     def test_raise_for_error_boundary_status_codes(self, test_name, status_code, expected_exception):
-        """Test that the correct exception is raised at 5xx range boundaries.
+        """Test that the correct exception is raised at 5xx range boundaries."""
+        with self.assertRaises(expected_exception):
+            raise_for_error(self._make_response(status_code))
 
-        For status_500_unmapped the ERROR_CODE_EXCEPTION_MAPPING entry for 500
-        is temporarily removed so the unmapped-5xx branch (500 <= code < 600)
-        is exercised at the exact lower boundary, confirming the inclusive ``<=``
-        introduced when 500 was added to the BranchServer5xxError condition.
+    def test_raise_for_error_status_500_unmapped(self):
+        """Test that an unmapped 500 raises BranchServer5xxError.
+
+        raise_for_error uses ``500 <= status_code < 600`` (inclusive lower
+        boundary), so a 500 not present in ERROR_CODE_EXCEPTION_MAPPING must
+        fall into the BranchServer5xxError branch rather than the default
+        BranchError. The mapping entry is temporarily removed and restored to
+        isolate this boundary condition without affecting other tests.
         """
-        response = self._make_response(status_code)
-        if test_name == "status_500_unmapped":
-            from tap_branch.exceptions import ERROR_CODE_EXCEPTION_MAPPING
-            original = ERROR_CODE_EXCEPTION_MAPPING.pop(500, None)
-            try:
-                with self.assertRaises(expected_exception):
-                    raise_for_error(response)
-            finally:
-                if original is not None:
-                    ERROR_CODE_EXCEPTION_MAPPING[500] = original
-        else:
-            with self.assertRaises(expected_exception):
-                raise_for_error(response)
+        from tap_branch.exceptions import ERROR_CODE_EXCEPTION_MAPPING
+        original = ERROR_CODE_EXCEPTION_MAPPING.pop(500, None)
+        try:
+            with self.assertRaises(BranchServer5xxError):
+                raise_for_error(self._make_response(500))
+        finally:
+            if original is not None:
+                ERROR_CODE_EXCEPTION_MAPPING[500] = original
