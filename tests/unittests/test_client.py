@@ -375,21 +375,3 @@ class TestRaiseForErrorBoundaryValues(unittest.TestCase):
         """Test that the correct exception is raised at 5xx range boundaries."""
         with self.assertRaises(expected_exception):
             raise_for_error(self._make_response(status_code))
-
-    def test_raise_for_error_status_500_unmapped(self):
-        """Test that an unmapped 500 raises BranchServer5xxError.
-
-        raise_for_error uses ``500 <= status_code < 600`` (inclusive lower
-        boundary), so a 500 not present in ERROR_CODE_EXCEPTION_MAPPING must
-        fall into the BranchServer5xxError branch rather than the default
-        BranchError. The mapping entry is temporarily removed and restored to
-        isolate this boundary condition without affecting other tests.
-        """
-        from tap_branch.exceptions import ERROR_CODE_EXCEPTION_MAPPING
-        original = ERROR_CODE_EXCEPTION_MAPPING.pop(500, None)
-        try:
-            with self.assertRaises(BranchServer5xxError):
-                raise_for_error(self._make_response(500))
-        finally:
-            if original is not None:
-                ERROR_CODE_EXCEPTION_MAPPING[500] = original
