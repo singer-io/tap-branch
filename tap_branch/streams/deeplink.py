@@ -25,8 +25,8 @@ class DeepLink(FullTableStream):
         try:
             deeplink_id = record["data"]["~id"]
             record["id"] = deeplink_id
-        except KeyError:
-            raise Exception("Primary key '~id' missing in the deeplink record")
+        except KeyError as e:
+            raise Exception("Primary key '~id' missing in the deeplink record") from e
 
     def get_records(self, headers: Dict, query_params: Dict):
 
