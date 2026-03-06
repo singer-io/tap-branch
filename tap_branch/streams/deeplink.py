@@ -20,8 +20,13 @@ class DeepLink(FullTableStream):
     )
 
     def modify_object(self, record, parent_record=None):
-        deeplink_id = record["data"]["~id"]
-        record["id"] = deeplink_id
+        """ Modify the record to extract primary key to the root level
+        """
+        try:
+            deeplink_id = record["data"]["~id"]
+            record["id"] = deeplink_id
+        except KeyError:
+            raise Exception("Primary key '~id' missing in the deeplink record")
 
     def get_records(self, headers: Dict, query_params: Dict):
 
