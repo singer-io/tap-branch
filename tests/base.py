@@ -1,333 +1,115 @@
-import os
-
-from tap_tester.base_suite_tests.base_case import BaseCase
+from tap_branch.schema import get_schemas
 
 
-class BranchBaseTest(BaseCase):
-    """Setup expectations for test sub classes.
+class BranchBaseTest:
+    """Base test mixin providing shared metadata, config helpers, and mock-data
+    generators for tap-branch unit tests.
 
-    Metadata describing streams. A bunch of shared methods that are used
-    in tap-tester tests. Shared tap-specific methods (as needed).
+    Covers three representative streams:
+      - deeplink      (FULL_TABLE)
+      - app_config    (FULL_TABLE)
+      - eo_click      (INCREMENTAL)
     """
-    start_date = "2026-01-01T00:00:00Z"
-    PARENT_TAP_STREAM_ID = "parent-tap-stream-id"
 
-    @staticmethod
-    def tap_name():
-        """The name of the tap."""
-        return "tap-branch"
+    DEFAULT_START_DATE = "2024-01-01T00:00:00Z"
 
-    @staticmethod
-    def get_type():
-        """The name of the tap."""
-        return "platform.branch"
+    # Metadata key constants
+    PRIMARY_KEYS = "primary_keys"
+    REPLICATION_METHOD = "replication_method"
+    REPLICATION_KEYS = "replication_keys"
+    FULL_TABLE = "FULL_TABLE"
+    INCREMENTAL = "INCREMENTAL"
+
+    # The three streams exercised by these tests
+    STREAMS_TO_TEST = {"deeplink", "app_config", "eo_click"}
 
     @classmethod
     def expected_metadata(cls):
-        """The expected streams and metadata about the streams."""
+        """The expected stream metadata for the 3 representative streams under test."""
         return {
             "deeplink": {
                 cls.PRIMARY_KEYS: {"id"},
                 cls.REPLICATION_METHOD: cls.FULL_TABLE,
                 cls.REPLICATION_KEYS: set(),
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
             },
             "app_config": {
                 cls.PRIMARY_KEYS: {"id"},
                 cls.REPLICATION_METHOD: cls.FULL_TABLE,
                 cls.REPLICATION_KEYS: set(),
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
-            },
-            "eo_impression": {
-                cls.PRIMARY_KEYS: {"id"},
-                cls.REPLICATION_METHOD: cls.INCREMENTAL,
-                cls.REPLICATION_KEYS: {"timestamp"},
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
             },
             "eo_click": {
                 cls.PRIMARY_KEYS: {"id"},
                 cls.REPLICATION_METHOD: cls.INCREMENTAL,
                 cls.REPLICATION_KEYS: {"timestamp"},
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
             },
-            "eo_web_to_app_auto_redirect": {
-                cls.PRIMARY_KEYS: {"id"},
-                cls.REPLICATION_METHOD: cls.INCREMENTAL,
-                cls.REPLICATION_KEYS: {"timestamp"},
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
-            },
-            "eo_branch_cta_view": {
-                cls.PRIMARY_KEYS: {"id"},
-                cls.REPLICATION_METHOD: cls.INCREMENTAL,
-                cls.REPLICATION_KEYS: {"timestamp"},
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
-            },
-            "eo_open": {
-                cls.PRIMARY_KEYS: {"id"},
-                cls.REPLICATION_METHOD: cls.INCREMENTAL,
-                cls.REPLICATION_KEYS: {"timestamp"},
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
-            },
-            "eo_install": {
-                cls.PRIMARY_KEYS: {"id"},
-                cls.REPLICATION_METHOD: cls.INCREMENTAL,
-                cls.REPLICATION_KEYS: {"timestamp"},
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
-            },
-            "eo_reinstall": {
-                cls.PRIMARY_KEYS: {"id"},
-                cls.REPLICATION_METHOD: cls.INCREMENTAL,
-                cls.REPLICATION_KEYS: {"timestamp"},
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
-            },
-            "eo_web_session_start": {
-                cls.PRIMARY_KEYS: {"id"},
-                cls.REPLICATION_METHOD: cls.INCREMENTAL,
-                cls.REPLICATION_KEYS: {"timestamp"},
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
-            },
-            "eo_pageview": {
-                cls.PRIMARY_KEYS: {"id"},
-                cls.REPLICATION_METHOD: cls.INCREMENTAL,
-                cls.REPLICATION_KEYS: {"timestamp"},
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
-            },
-            "eo_commerce_event": {
-                cls.PRIMARY_KEYS: {"id"},
-                cls.REPLICATION_METHOD: cls.INCREMENTAL,
-                cls.REPLICATION_KEYS: {"timestamp"},
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
-            },
-            "eo_custom_event": {
-                cls.PRIMARY_KEYS: {"id"},
-                cls.REPLICATION_METHOD: cls.INCREMENTAL,
-                cls.REPLICATION_KEYS: {"timestamp"},
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
-            },
-            "eo_content_event": {
-                cls.PRIMARY_KEYS: {"id"},
-                cls.REPLICATION_METHOD: cls.INCREMENTAL,
-                cls.REPLICATION_KEYS: {"timestamp"},
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
-            },
-            "eo_dismissal": {
-                cls.PRIMARY_KEYS: {"id"},
-                cls.REPLICATION_METHOD: cls.INCREMENTAL,
-                cls.REPLICATION_KEYS: {"timestamp"},
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
-            },
-            "eo_user_lifecycle_event": {
-                cls.PRIMARY_KEYS: {"id"},
-                cls.REPLICATION_METHOD: cls.INCREMENTAL,
-                cls.REPLICATION_KEYS: {"timestamp"},
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
-            },
-            "cost": {
-                cls.PRIMARY_KEYS: {"id"},
-                cls.REPLICATION_METHOD: cls.INCREMENTAL,
-                cls.REPLICATION_KEYS: {"timestamp"},
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
-            },
-            "skadnetwork_valid_messages": {
-                cls.PRIMARY_KEYS: {"id"},
-                cls.REPLICATION_METHOD: cls.INCREMENTAL,
-                cls.REPLICATION_KEYS: {"timestamp"},
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
-            },
-            "eo_san_touch": {
-                cls.PRIMARY_KEYS: {"id"},
-                cls.REPLICATION_METHOD: cls.INCREMENTAL,
-                cls.REPLICATION_KEYS: {"timestamp"},
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
-            },
-            "eo_click_blocked": {
-                cls.PRIMARY_KEYS: {"id"},
-                cls.REPLICATION_METHOD: cls.INCREMENTAL,
-                cls.REPLICATION_KEYS: {"timestamp"},
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
-            },
-            "eo_impression_blocked": {
-                cls.PRIMARY_KEYS: {"id"},
-                cls.REPLICATION_METHOD: cls.INCREMENTAL,
-                cls.REPLICATION_KEYS: {"timestamp"},
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
-            },
-            "eo_install_blocked": {
-                cls.PRIMARY_KEYS: {"id"},
-                cls.REPLICATION_METHOD: cls.INCREMENTAL,
-                cls.REPLICATION_KEYS: {"timestamp"},
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
-            },
-            "eo_reinstall_blocked": {
-                cls.PRIMARY_KEYS: {"id"},
-                cls.REPLICATION_METHOD: cls.INCREMENTAL,
-                cls.REPLICATION_KEYS: {"timestamp"},
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
-            },
-            "eo_open_blocked": {
-                cls.PRIMARY_KEYS: {"id"},
-                cls.REPLICATION_METHOD: cls.INCREMENTAL,
-                cls.REPLICATION_KEYS: {"timestamp"},
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
-            },
-            "eo_web_session_start_blocked": {
-                cls.PRIMARY_KEYS: {"id"},
-                cls.REPLICATION_METHOD: cls.INCREMENTAL,
-                cls.REPLICATION_KEYS: {"timestamp"},
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
-            },
-            "eo_pageview_blocked": {
-                cls.PRIMARY_KEYS: {"id"},
-                cls.REPLICATION_METHOD: cls.INCREMENTAL,
-                cls.REPLICATION_KEYS: {"timestamp"},
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
-            },
-            "eo_custom_event_blocked": {
-                cls.PRIMARY_KEYS: {"id"},
-                cls.REPLICATION_METHOD: cls.INCREMENTAL,
-                cls.REPLICATION_KEYS: {"timestamp"},
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
-            },
-            "eo_content_event_blocked": {
-                cls.PRIMARY_KEYS: {"id"},
-                cls.REPLICATION_METHOD: cls.INCREMENTAL,
-                cls.REPLICATION_KEYS: {"timestamp"},
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
-            },
-            "eo_commerce_event_blocked": {
-                cls.PRIMARY_KEYS: {"id"},
-                cls.REPLICATION_METHOD: cls.INCREMENTAL,
-                cls.REPLICATION_KEYS: {"timestamp"},
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
-            },
-            "eo_user_lifecycle_event_blocked": {
-                cls.PRIMARY_KEYS: {"id"},
-                cls.REPLICATION_METHOD: cls.INCREMENTAL,
-                cls.REPLICATION_KEYS: {"timestamp"},
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
-            },
-            "eo_branch_cta_view_blocked": {
-                cls.PRIMARY_KEYS: {"id"},
-                cls.REPLICATION_METHOD: cls.INCREMENTAL,
-                cls.REPLICATION_KEYS: {"timestamp"},
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
-            },
-            "eo_web_to_app_auto_redirect_blocked": {
-                cls.PRIMARY_KEYS: {"id"},
-                cls.REPLICATION_METHOD: cls.INCREMENTAL,
-                cls.REPLICATION_KEYS: {"timestamp"},
-                cls.OBEYS_START_DATE: False,
-                cls.API_LIMIT: 100,
-                cls.PARENT_TAP_STREAM_ID: None
-            }
         }
 
     @staticmethod
-    def get_credentials():
-        """Authentication information for the test account."""
-        credentials_dict = {}
-        creds = {
-            "branch_app_id": "TAP_BRANCH_APP_ID",
-            "branch_access_token": "TAP_BRANCH_ACCESS_TOKEN",
-            "branch_key": "TAP_BRANCH_KEY",
-            "branch_secret": "TAP_BRANCH_SECRET",
-            "branch_window_size": "TAP_BRANCH_WINDOW_SIZE",
-            "deeplink_urls": "TAP_BRANCH_DEEPLINK_URLS"
-        }
-        for cred in creds:
-            credentials_dict[cred] = os.getenv(creds[cred])
-
-        return credentials_dict
-
-    def get_properties(self, original: bool = True):
-        """Configuration of properties required for the tap."""
-        return_value = {
-            "start_date": self.start_date,
-        }
-
-        return return_value
-
-    def expected_parent_tap_stream(self, stream=None):
-        """return a dictionary with key of table name and value of parent stream"""
-        parent_stream = {
-            table: properties.get(self.PARENT_TAP_STREAM_ID, None)
-            for table, properties in self.expected_metadata().items()}
-        if not stream:
-            return parent_stream
-        return parent_stream[stream]
-
-    def streams_with_no_data(self):
-        """Return a set of streams that have no data."""
+    def make_config(start_date=None):
+        """Return a minimal tap config dict suitable for unit tests."""
         return {
-            'eo_impression', 'eo_web_to_app_auto_redirect', 'eo_branch_cta_view', 'eo_open',
-            'eo_install', 'eo_reinstall', 'eo_web_session_start',
-            'eo_pageview', 'eo_commerce_event', 'eo_custom_event', 'eo_content_event',
-            'eo_dismissal', 'eo_user_lifecycle_event', 'cost', 'skadnetwork_valid_messages',
-            'eo_san_touch', 'eo_click_blocked', 'eo_impression_blocked', 'eo_install_blocked',
-            'eo_reinstall_blocked', 'eo_open_blocked', 'eo_web_session_start_blocked',
-            'eo_pageview_blocked', 'eo_custom_event_blocked', 'eo_content_event_blocked',
-            'eo_commerce_event_blocked', 'eo_user_lifecycle_event_blocked', 'eo_branch_cta_view_blocked',
-            'eo_web_to_app_auto_redirect_blocked'
+            "start_date": start_date or BranchBaseTest.DEFAULT_START_DATE,
+            "branch_app_id": "test-app-id",
+            "branch_access_token": "test-access-token",
+            "branch_key": "test-key",
+            "branch_secret": "test-secret",
+            "branch_window_size": "1",
+            "deeplink_urls": "https://example.app.link/test",
         }
+
+    @staticmethod
+    def _get_selected_stream(stream_name):
+        """Return a CatalogEntry for *stream_name* with ``selected=True``."""
+        import singer.metadata as singer_metadata
+        from tap_branch.discover import discover
+
+        catalog = discover()
+        stream_entry = catalog.get_stream(stream_name)
+        meta_map = singer_metadata.to_map(stream_entry.metadata)
+        meta_map[()]["selected"] = True
+        stream_entry.metadata = singer_metadata.to_list(meta_map)
+        return stream_entry
+
+    # -------------------------------------------------------------------------
+    # Schema / mock-data helpers
+    # -------------------------------------------------------------------------
+
+    @staticmethod
+    def _schema_type(schema):
+        """Return the first non-null type from a JSON-Schema type definition."""
+        prop_type = schema.get("type")
+        if isinstance(prop_type, list):
+            non_null = [t for t in prop_type if t != "null"]
+            return non_null[0] if non_null else "null"
+        return prop_type
+
+    @classmethod
+    def _generate_value(cls, schema, date_value=None):
+        """Recursively generate a placeholder value that conforms to *schema*."""
+        date_value = date_value or cls.DEFAULT_START_DATE
+        prop_type = cls._schema_type(schema)
+        fmt = schema.get("format")
+
+        if fmt == "date-time":
+            return date_value
+        if prop_type == "string":
+            return "mock_value"
+        if prop_type in ("integer", "number"):
+            return 1
+        if prop_type == "boolean":
+            return True
+        if prop_type == "array":
+            items_schema = schema.get("items", {})
+            return [cls._generate_value(items_schema, date_value)]
+        if prop_type == "object":
+            properties = schema.get("properties", {})
+            return {k: cls._generate_value(v, date_value) for k, v in properties.items()}
+        return None
+
+    @classmethod
+    def _generate_stream_record(cls, stream_name, date_value=None):
+        """Return a synthetic record dict for *stream_name* built from its schema."""
+        date_value = date_value or cls.DEFAULT_START_DATE
+        schemas, _ = get_schemas()
+        schema = schemas[stream_name]
+        return cls._generate_value(schema, date_value)

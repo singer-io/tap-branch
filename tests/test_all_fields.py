@@ -1,218 +1,144 @@
+"""Verify that every expected field is present in synced records.
+
+Full-table streams (deeplink, app_config) mock Client.make_request.
+The incremental stream (eo_click) mocks the job-based export pipeline.
+"""
+import unittest
+from unittest.mock import patch
+
+import pendulum
+from singer import Transformer
+
+from tap_branch.client import Client
+from tap_branch.streams import STREAMS
+
 from base import BranchBaseTest
-from tap_tester.base_suite_tests.all_fields_test import AllFieldsTest
+
+# Fixed 'now' keeps the eo_click windowing loop to 1 iteration.
+_FIXED_NOW = pendulum.datetime(2026, 3, 11, tz="UTC")
+# Start date close to _FIXED_NOW → exactly 1 window (10 days < 60-day max).
+_EO_CLICK_START = "2026-03-01T00:00:00Z"
 
 
-class BranchAllFields(AllFieldsTest, BranchBaseTest):
-    """Ensure running the tap with all streams and fields selected results in
-    the replication of all fields."""
+class TestAllFields(BranchBaseTest, unittest.TestCase):
+    """Every field returned by the API must appear in the synced record."""
+
+    # Fields not covered by the mock-data generator (rare / nested paths).
     MISSING_FIELDS = {
-        # These fields don't appear in the API response
-        "deeplink": [
-            'alias',
-            'stage',
-            'tags',
-            'duration'
-        ],
-
-        "app_config": [
-            'dev_phone_number'
-        ],
-
-        "eo_click": [
-            'datasource',
-            'install_activity_timestamp',
-            'last_cta_view_data_tilde_technology_partner',
-            'last_cta_view_data_tilde_sub_site_name',
-            'last_cta_view_data_tilde_campaign_id',
-            'user_data_idfv',
-            'user_data_cpp_level',
-            'user_data_build',
-            'last_attributed_touch_data_tilde_advertising_partner_id',
-            'install_activity_touch_data_tilde_channel',
-            'last_cta_view_data_tilde_keyword',
-            'last_cta_view_data_dollar_meta_is_mobile_data_terms_signed',
-            'event_data_exchange_rate',
-            'last_cta_view_data_tilde_secondary_publisher',
-            'user_data_cpu_type',
-            'last_cta_view_data_tilde_feature',
-            'user_data_opted_in_status',
-            'last_cta_view_data_tilde_tune_publisher_sub2',
-            'deep_linked',
-            'last_attributed_touch_data_plus_web_format',
-            'last_cta_view_data_tilde_tags',
-            'store_install_begin_timestamp',
-            'content_items',
-            'user_data_idfa',
-            'event_data_shipping',
-            'last_cta_view_data_tilde_customer_placement',
-            'last_cta_view_data_tilde_optimization_model',
-            'last_attributed_touch_data_tilde_view_id',
-            'last_attributed_touch_type',
-            'last_attributed_touch_data_tilde_advertising_partner_name',
-            'user_data_referral_source',
-            'webhook_response_code',
-            'last_attributed_touch_data_tilde_organic_search_url',
-            'last_attributed_touch_data_tilde_customer_placement',
-            'existing_user',
-            'user_data_app_store',
-            'user_data_windows_aid',
-            'user_data_screen_height',
-            'last_cta_view_data_tilde_customer_keyword',
-            'last_attributed_touch_data_tilde_journey_id',
-            'last_cta_view_data_plus_referring_domain',
-            'event_data_transaction_id',
-            'last_cta_view_data_custom_fields',
-            'last_cta_view_data_dollar_3p',
-            'last_attributed_touch_data_tilde_secondary_publisher',
-            'event_data_tax',
-            'user_data_kindle_id',
-            'last_cta_view_timestamp',
-            'user_data_oaid',
-            'event_data_description',
-            'event_data_custom_param_10',
-            'user_data_is_jailbroken',
-            'last_attributed_touch_data_tilde_tune_publisher_sub2',
-            'days_from_last_attributed_touch_to_event',
-            'last_attributed_touch_data_tilde_customer_campaign',
-            'install_activity_touch_data_tilde_feature',
-            'last_cta_view_data_tilde_creative_id',
-            'user_data_geo_postal_code',
-            'last_attributed_touch_data_tilde_customer_ad_set_name',
-            'referrer_click_timestamp',
-            'user_data_carrier_name',
-            'last_attributed_touch_data_tilde_tune_publisher_sub4',
-            'seconds_from_last_attributed_touch_to_event',
-            'last_cta_view_data_tilde_banner_dimensions',
-            'last_cta_view_data_tilde_customer_ad_set_name',
-            'user_data_cross_platform_id',
-            'last_cta_view_data_tilde_campaign_type',
-            'minutes_from_last_attributed_touch_to_event',
-            'custom_data',
-            'last_attributed_touch_data_dollar_meta_is_mobile_data_terms_signed',
-            'last_attributed_touch_data_tilde_tune_publisher_sub5',
-            'attributed',
-            'last_attributed_touch_data_tilde_journey_name',
-            'days_from_install_to_opt_in',
-            'user_data_os_version_android',
-            'last_attributed_touch_data_tilde_content_id',
-            'last_cta_view_data_tilde_customer_secondary_publisher',
-            'last_cta_view_data_tilde_ad_set_id',
-            'last_attributed_touch_data_tilde_branch_ad_format',
-            'user_data_tune_mat_id',
-            'last_attributed_touch_data_tilde_ad_name',
-            'tune_site_name',
-            'event_data_custom_param_6',
-            'last_attributed_touch_data_tilde_tune_publisher_sub1',
-            'user_data_aaid',
-            'last_attributed_touch_data_tilde_campaign_id',
-            'last_cta_view_data_tilde_customer_ad_name',
-            'last_attributed_touch_data_tilde_placement',
-            'event_data_custom_param_4',
-            'last_attributed_touch_data_tilde_customer_sub_site_name',
-            'last_cta_view_data_tilde_tune_publisher_sub4',
-            'user_data_limit_ad_tracking',
-            'event_data_custom_param_3',
-            'last_attributed_touch_data_tilde_technology_partner',
-            'organization_id',
-            'last_attributed_touch_data_tilde_customer_keyword',
-            'last_attributed_touch_data_tilde_customer_secondary_publisher',
-            'user_data_installer_package_name',
-            'last_cta_view_data_tilde_tune_publisher_sub3',
-            'last_attributed_touch_data_tilde_placement_id',
-            'last_cta_view_data_tilde_placement',
-            'last_cta_view_data_tilde_tune_publisher_sub1',
-            'last_attributed_touch_data_tilde_ad_set_id',
-            'last_cta_view_data_tilde_agency_id',
-            'last_attributed_touch_data_tilde_keyword',
-            'event_data_custom_param_5',
-            'last_attributed_touch_data_tilde_tune_publisher_sub3',
-            'last_cta_view_data_tilde_branch_ad_format',
-            'last_cta_view_data_tilde_agency',
-            'last_cta_view_data_tilde_tune_publisher_id',
-            'webhook_request_url',
-            'last_attributed_touch_data_tilde_tune_publisher_name',
-            'user_data_developer_identity',
-            'last_cta_view_data_plus_web_format',
-            'install_activity_touch_data_dollar_meta_is_mobile_data_terms_signed',
-            'last_cta_view_data_tilde_external_touch_id',
-            'last_cta_view_data_tilde_journey_name',
-            'last_attributed_touch_data_tilde_external_touch_id',
-            'match_guaranteed',
-            'customer_event_alias',
-            'last_attributed_touch_data_tilde_view_name',
-            'event_data_custom_param_2',
-            'last_cta_view_data_tilde_advertising_partner_id',
-            'last_attributed_touch_data_tilde_agency',
-            'last_attributed_touch_data_tilde_ad_id',
-            'last_attributed_touch_data_dollar_fb_data_terms_not_signed',
-            'install_activity_touch_data_tilde_campaign',
-            'last_cta_view_data_tilde_keyword_id',
-            'last_cta_view_data_tilde_creative_name',
-            'user_data_app_version',
-            'reengagement_activity_touch_data_dollar_meta_is_mobile_data_terms_signed',
-            'last_attributed_touch_data_tilde_keyword_id',
-            'last_attributed_touch_data_dollar_3p',
-            'last_attributed_touch_data_tilde_sub_site_name',
-            'last_attributed_touch_data_tilde_keyword_match_type',
-            'last_cta_view_data_tilde_advertising_partner_name',
-            'event_data_coupon',
-            'event_data_custom_param_9',
-            'event_data_search_query',
-            'last_cta_view_data_plus_via_features',
-            'last_attributed_touch_data_tilde_customer_ad_name',
-            'last_cta_view_data_tilde_tune_publisher_sub5',
-            'event_data_custom_param_8',
-            'webhook_request_headers',
-            'last_cta_view_data_tilde_tune_publisher_name',
-            'last_attributed_touch_data_tilde_stage',
-            'event_data_custom_param_7',
-            'last_cta_view_data_tilde_customer_campaign',
-            'user_data_app_package_name',
-            'last_attributed_touch_data_tilde_secondary_ad_format',
-            'user_data_internet_connection_type',
-            'hours_from_last_attributed_touch_to_event',
-            'event_data_ad_type',
-            'last_cta_view_data_tilde_campaign',
-            'last_cta_view_data_tilde_stage',
-            'last_attributed_touch_data_plus_touch_id',
-            'event_data_affiliation',
-            'last_cta_view_data_tilde_ad_name',
-            'last_cta_view_data_tilde_ad_set_name',
-            'last_attributed_touch_data_tilde_optimization_model',
-            'last_attributed_touch_data_tilde_secondary_publisher_id',
-            'user_data_http_referrer',
-            'last_cta_view_data_tilde_id',
-            'last_attributed_touch_data_tilde_campaign_type',
-            'last_cta_view_data_tilde_secondary_publisher_id',
-            'last_cta_view_data_tilde_secondary_ad_format',
-            'user_data_screen_width',
-            'last_attributed_touch_data_tilde_ad_set_name',
-            'last_cta_view_data_plus_touch_id',
-            'last_cta_view_data_tilde_view_id',
-            'first_event_for_user',
-            'last_attributed_touch_data_tilde_banner_dimensions',
-            'last_attributed_touch_timestamp',
-            'last_cta_view_data_tilde_journey_id',
-            'last_cta_view_data_tilde_customer_sub_site_name',
-            'organization_name',
-            'user_data_android_id',
-            'last_cta_view_data_tilde_placement_id',
-            'tune_site_id',
-            'persona_identifiers',
-            'last_cta_view_data_tilde_ad_id',
-            'last_cta_view_data_tilde_view_name',
-            'last_cta_view_data_tilde_channel',
-            'event_data_custom_param_1',
-            'last_attributed_touch_data_tilde_creative_id',
-            'last_attributed_touch_data_tilde_agency_id'
-        ]
+        "deeplink": set(),
+        "app_config": set(),
+        "eo_click": set()
     }
 
-    @staticmethod
-    def name():
-        return "tap_tester_branch_all_fields_test"
+    # ------------------------------------------------------------------
+    # Helpers
+    # ------------------------------------------------------------------
 
-    def streams_to_test(self):
-        streams_to_exclude = self.streams_with_no_data()
+    def _run_full_table_sync(self, stream_name, mock_record,
+                              mock_make_request, mock_write_record):
+        """Configure injected full-table mocks, run sync, return written list."""
+        config = self.make_config()
+        client = Client(config)
+        stream_entry = self._get_selected_stream(stream_name)
+        stream = STREAMS[stream_name](client, stream_entry)
 
-        return self.expected_stream_names().difference(streams_to_exclude)
+        mock_make_request.return_value = mock_record
+        written = []
+        mock_write_record.side_effect = lambda sid, rec: written.append(rec)
+
+        stream.sync(state={}, transformer=Transformer())
+        return written
+
+    def _check_fields(self, stream_name, record):
+        """Assert every schema field (minus known gaps) appears in ``record``."""
+        schemas, _ = get_schemas_for(stream_name)
+        schema_properties = schemas[stream_name]["properties"].keys()
+        missing_allowed = self.MISSING_FIELDS.get(stream_name, set())
+        for field in schema_properties:
+            if field in missing_allowed:
+                continue
+            self.assertIn(
+                field,
+                record,
+                msg=f"Expected field '{field}' missing from {stream_name} record",
+            )
+
+    # ------------------------------------------------------------------
+    # Full-table streams
+    # ------------------------------------------------------------------
+
+    @patch("tap_branch.streams.deeplink.write_record")
+    @patch("tap_branch.client.Client.make_request")
+    def test_deeplink_all_expected_fields_present(
+        self, mock_make_request, mock_write_record
+    ):
+        record = self._generate_stream_record("deeplink")
+        written = self._run_full_table_sync(
+            "deeplink", record, mock_make_request, mock_write_record
+        )
+        self.assertTrue(written, "No records written for deeplink")
+        self._check_fields("deeplink", written[0])
+
+    @patch("tap_branch.streams.app_config.write_record")
+    @patch("tap_branch.client.Client.make_request")
+    def test_app_config_all_expected_fields_present(
+        self, mock_make_request, mock_write_record
+    ):
+        record = self._generate_stream_record("app_config")
+        written = self._run_full_table_sync(
+            "app_config", record, mock_make_request, mock_write_record
+        )
+        self.assertTrue(written, "No records written for app_config")
+        self._check_fields("app_config", written[0])
+
+    # ------------------------------------------------------------------
+    # Incremental stream (job-based export pipeline)
+    # ------------------------------------------------------------------
+
+    @patch("tap_branch.streams.branch_events.singer.write_state")
+    @patch("tap_branch.streams.branch_events.write_record")
+    @patch("tap_branch.streams.branch_events.BranchEventsBaseStream.extract_data")
+    @patch("tap_branch.client.Client.check_export_job_status", return_value=(True, {"response_url": "http://mock"}))
+    @patch("tap_branch.client.Client.create_export_job", return_value="mock_handle")
+    @patch("tap_branch.client.Client.check_data_readiness", return_value=True)
+    @patch("tap_branch.streams.branch_events.pendulum.now", return_value=_FIXED_NOW)
+    def test_eo_click_all_expected_fields_present(
+        self,
+        _mock_now,
+        _mock_ready,
+        _mock_create,
+        _mock_status,
+        mock_extract,
+        mock_write_record,
+        _mock_write_state,
+    ):
+        record = self._generate_stream_record("eo_click",
+                                              date_value=_EO_CLICK_START)
+        mock_extract.side_effect = lambda job_response: iter([record])
+        written = []
+        mock_write_record.side_effect = lambda sid, rec: written.append(rec)
+
+        config = self.make_config(start_date=_EO_CLICK_START)
+        config["branch_window_size"] = "60"
+        client = Client(config)
+        stream_entry = self._get_selected_stream("eo_click")
+        stream = STREAMS["eo_click"](client, stream_entry)
+        stream.sync(state={}, transformer=Transformer())
+
+        self.assertTrue(written, "No records written for eo_click")
+        self._check_fields("eo_click", written[0])
+
+
+# ---------------------------------------------------------------------------
+# Utility — thin wrapper so _check_fields can call the schema loader
+# ---------------------------------------------------------------------------
+from tap_branch.schema import get_schemas as _get_schemas  # noqa: E402
+
+
+def get_schemas_for(stream_name):
+    """Return (schemas, field_metadata) scoped to a single stream."""
+    schemas, field_metadata = _get_schemas()
+    return (
+        {stream_name: schemas[stream_name]},
+        {stream_name: field_metadata[stream_name]},
+    )
