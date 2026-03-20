@@ -49,6 +49,36 @@
                         "string"
                     ]
                 },
+                "screen": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "product_id": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "~feature": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "~link_type": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "~campaign": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
                 "url": {
                     "type": [
                         "null",
@@ -91,7 +121,7 @@
                         "string"
                     ]
                 },
-                "$id": {
+                "~id": {
                     "type": [
                         "null",
                         "string"
