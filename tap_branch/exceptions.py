@@ -47,22 +47,22 @@ class BranchRateLimitError(BranchBackoffError):
     pass
 
 
-class BranchInternalServerError(BranchBackoffError):
+class BranchServer5xxError(BranchError):
+    """ class representing all server error codes """
+    pass
+
+
+class BranchInternalServerError(BranchServer5xxError):
     """class representing 500 status code."""
     pass
 
 
-class BranchNotImplementedError(BranchBackoffError):
-    """class representing 501 status code."""
-    pass
-
-
-class BranchBadGatewayError(BranchBackoffError):
+class BranchBadGatewayError(BranchServer5xxError):
     """class representing 502 status code."""
     pass
 
 
-class BranchServiceUnavailableError(BranchBackoffError):
+class BranchServiceUnavailableError(BranchServer5xxError):
     """class representing 503 status code."""
     pass
 
@@ -100,10 +100,6 @@ ERROR_CODE_EXCEPTION_MAPPING = {
         "raise_exception": BranchInternalServerError,
         "message": "The server encountered an unexpected condition which prevented it from fulfilling the request."
     },
-    501: {
-        "raise_exception": BranchNotImplementedError,
-        "message": "The server does not support the functionality required to fulfill the request."
-    },
     502: {
         "raise_exception": BranchBadGatewayError,
         "message": "Server received an invalid response."
@@ -113,3 +109,26 @@ ERROR_CODE_EXCEPTION_MAPPING = {
         "message": "API service is currently unavailable."
     }
 }
+
+
+# Custom Branch Exceptions
+class BranchUnsupportedFieldsError(BranchError):
+    def __init__(self, fields: list[str], raw_response: dict):
+        self.fields = fields
+        self.raw_response = raw_response
+        super().__init__(f"Unsupported fields from Branch: {fields}")
+
+
+class BranchExportFailed(BranchError):
+    """ Class that represents branch export job failed to complete successfully"""
+    pass
+
+
+class BranchExportTimeout(BranchError):
+    """ Class that represents branch export job not completed under set timeout"""
+    pass
+
+
+class BranchFatalRateLimitError(BranchError):
+    """Non-retryable rate limit (retry too long)"""
+    pass
