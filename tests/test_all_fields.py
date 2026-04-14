@@ -1,6 +1,5 @@
 """Verify that every expected field is present in synced records.
 
-Full-table streams (deeplink, app_config) mock Client.make_request.
 The incremental stream (eo_click) mocks the job-based export pipeline.
 """
 import unittest
@@ -25,8 +24,6 @@ class TestAllFields(BranchBaseTest, unittest.TestCase):
 
     # Fields not covered by the mock-data generator (rare / nested paths).
     MISSING_FIELDS = {
-        "deeplink": set(),
-        "app_config": set(),
         "eo_click": set()
     }
 
@@ -62,34 +59,6 @@ class TestAllFields(BranchBaseTest, unittest.TestCase):
                 record,
                 msg=f"Expected field '{field}' missing from {stream_name} record",
             )
-
-    # ------------------------------------------------------------------
-    # Full-table streams
-    # ------------------------------------------------------------------
-
-    @patch("tap_branch.streams.deeplink.write_record")
-    @patch("tap_branch.client.Client.make_request")
-    def test_deeplink_all_expected_fields_present(
-        self, mock_make_request, mock_write_record
-    ):
-        record = self._generate_stream_record("deeplink")
-        written = self._run_full_table_sync(
-            "deeplink", record, mock_make_request, mock_write_record
-        )
-        self.assertTrue(written, "No records written for deeplink")
-        self._check_fields("deeplink", written[0])
-
-    @patch("tap_branch.streams.app_config.write_record")
-    @patch("tap_branch.client.Client.make_request")
-    def test_app_config_all_expected_fields_present(
-        self, mock_make_request, mock_write_record
-    ):
-        record = self._generate_stream_record("app_config")
-        written = self._run_full_table_sync(
-            "app_config", record, mock_make_request, mock_write_record
-        )
-        self.assertTrue(written, "No records written for app_config")
-        self._check_fields("app_config", written[0])
 
     # ------------------------------------------------------------------
     # Incremental stream (job-based export pipeline)

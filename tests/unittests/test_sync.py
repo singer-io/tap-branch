@@ -10,7 +10,7 @@ class TestSync(unittest.TestCase):
     def test_write_schema_only_parent_selected(self):
         mock_stream = MagicMock()
         mock_stream.is_selected.return_value = True
-        mock_stream.children = ["app_config"]
+        mock_stream.children = []
         mock_stream.child_to_sync = []
 
         client = MagicMock()

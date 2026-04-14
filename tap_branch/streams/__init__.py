@@ -2,9 +2,7 @@ from typing import Dict
 
 from tap_branch.branch_constants import (BRANCH_EXPORT_EVENT_DEFINITIONS,
                                          BranchExportEventDefinition)
-from tap_branch.streams.app_config import AppConfig
 from tap_branch.streams.branch_events import BranchEventsBaseStream
-from tap_branch.streams.deeplink import DeepLink
 
 
 def create_branch_event_stream(definition: BranchExportEventDefinition):
@@ -37,10 +35,7 @@ def generate_custom_event_streams() -> Dict:
     return custom_event_streams
 
 
-STREAMS = {
-    "deeplink": DeepLink,
-    "app_config": AppConfig
-}
+STREAMS = {}
 
 # Add dynamically generated each report_type stream to STREAMS
 STREAMS.update(generate_custom_event_streams())

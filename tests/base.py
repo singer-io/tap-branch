@@ -5,9 +5,7 @@ class BranchBaseTest:
     """Base test mixin providing shared metadata, config helpers, and mock-data
     generators for tap-branch unit tests.
 
-    Covers three representative streams:
-      - deeplink      (FULL_TABLE)
-      - app_config    (FULL_TABLE)
+    Covers the Custom Export API streams:
       - eo_click      (INCREMENTAL)
     """
 
@@ -20,23 +18,13 @@ class BranchBaseTest:
     FULL_TABLE = "FULL_TABLE"
     INCREMENTAL = "INCREMENTAL"
 
-    # The three streams exercised by these tests
-    STREAMS_TO_TEST = {"deeplink", "app_config", "eo_click"}
+    # The streams exercised by these tests
+    STREAMS_TO_TEST = {"eo_click"}
 
     @classmethod
     def expected_metadata(cls):
-        """The expected stream metadata for the 3 representative streams under test."""
+        """The expected stream metadata for the representative streams under test."""
         return {
-            "deeplink": {
-                cls.PRIMARY_KEYS: {"id"},
-                cls.REPLICATION_METHOD: cls.FULL_TABLE,
-                cls.REPLICATION_KEYS: set(),
-            },
-            "app_config": {
-                cls.PRIMARY_KEYS: {"id"},
-                cls.REPLICATION_METHOD: cls.FULL_TABLE,
-                cls.REPLICATION_KEYS: set(),
-            },
             "eo_click": {
                 cls.PRIMARY_KEYS: {"id"},
                 cls.REPLICATION_METHOD: cls.INCREMENTAL,

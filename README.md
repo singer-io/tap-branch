@@ -7,10 +7,6 @@ This tap:
 
 - Pulls raw data from the [branch API](https://help.branch.io/apidocs/apis-overview).
 - Extracts the following resources:
-    - [AppConfig](https://help.branch.io/apidocs/getcurrentbrancappconfig)
-
-    - [DeepLink](https://help.branch.io/apidocs/readexistingdeeplink)
-
     - [Custom Export Endpoints](https://help.branch.io/apidocs/custom-exports-api)
 
 - Outputs the schema for each resource
@@ -19,14 +15,6 @@ This tap:
 
 ## Streams
 
-
-**[app_config](https://help.branch.io/apidocs/getcurrentbrancappconfig)**
-- Primary keys: ['id']
-- Replication strategy: FULL_TABLE
-
-**[deeplink](https://help.branch.io/apidocs/readexistingdeeplink)**
-- Primary keys: ['id']
-- Replication strategy: FULL_TABLE
 
 **[branch_events](https://help.branch.io/apidocs/custom-exports-api)**
 - Primary keys: ['id']
