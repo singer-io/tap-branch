@@ -33,7 +33,6 @@ class TestBranchEventsBaseStream(unittest.TestCase):
             "branch_key": "test_key",
             "branch_secret": "test_secret",
             "branch_window_size": 30,
-            "deeplink_urls": "test-url",
             "start_date": "2024-01-01T00:00:00Z",
         }
         self.mock_catalog = MagicMock()

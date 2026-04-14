@@ -42,7 +42,6 @@ class BranchBaseTest:
             "branch_key": "test-key",
             "branch_secret": "test-secret",
             "branch_window_size": "1",
-            "deeplink_urls": "https://example.app.link/test",
         }
 
     @staticmethod
