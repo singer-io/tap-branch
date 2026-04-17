@@ -23,7 +23,7 @@ class BranchBaseTest:
 
     @classmethod
     def expected_metadata(cls):
-        """The expected stream metadata for the representative streams under test."""
+        """The expected stream metadata for a representative stream under test."""
         return {
             "eo_click": {
                 cls.PRIMARY_KEYS: {"id"},
