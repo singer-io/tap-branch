@@ -1,0 +1,1707 @@
+{
+  "type": "object",
+  "properties": {
+    "datasource": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "event_timestamp": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_custom_fields": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_dollar_3p": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_dollar_marketing_title": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_dollar_meta_is_mobile_data_terms_signed": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "last_attributed_touch_data_plus_current_feature": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_plus_touch_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_plus_web_format": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_ad_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_advertising_partner_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_advertising_partner_name": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_agency": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_agency_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_banner_dimensions": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_branch_ad_format": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_campaign": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_campaign_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_campaign_type": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_channel": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_content_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_creative_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_customer_ad_name": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_customer_ad_set_name": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_customer_campaign": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_customer_keyword": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_customer_placement": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_customer_secondary_publisher": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_customer_sub_site_name": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_external_touch_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_feature": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_keyword": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_keyword_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_optimization_model": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_placement": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_placement_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_secondary_ad_format": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_secondary_publisher": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_secondary_publisher_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_stage": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_sub_site_name": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_tags": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "string"
+        ]
+      }
+    },
+    "last_attributed_touch_data_tilde_technology_partner": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_tune_publisher_id": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "last_attributed_touch_data_tilde_tune_publisher_name": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_tune_publisher_sub1": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_tune_publisher_sub2": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_tune_publisher_sub3": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_tune_publisher_sub4": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_tune_publisher_sub5": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "name": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "organization_id": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "organization_name": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "origin": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "persona_identifiers": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "object"
+        ],
+        "properties": {
+          "id": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "type": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "guaranteed": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          }
+        }
+      }
+    },
+    "timestamp": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "tune_site_event_id": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "tune_site_id": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "tune_site_name": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_aaid": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_brand": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_browser": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_cpp_level": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_cross_platform_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_developer_identity": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_device_type": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_environment": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_geo_city_code": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "user_data_geo_city_en": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_geo_country_code": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_geo_country_en": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_geo_dma_code": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "user_data_geo_lat": {
+      "type": [
+        "null",
+        "number"
+      ]
+    },
+    "user_data_geo_lon": {
+      "type": [
+        "null",
+        "number"
+      ]
+    },
+    "user_data_geo_postal_code": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_geo_region_code": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_geo_region_en": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_http_referrer": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_idfa": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_ip": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_is_jailbroken": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "user_data_kindle_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_language": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_limit_ad_tracking": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "user_data_model": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_oaid": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_os": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_os_version": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_os_version_android": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_past_cross_platform_ids": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "string"
+        ]
+      }
+    },
+    "user_data_platform": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_prob_cross_platform_ids": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "object"
+        ],
+        "properties": {
+          "id": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "probability": {
+            "type": [
+              "null",
+              "number"
+            ]
+          }
+        }
+      }
+    },
+    "user_data_tune_mat_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_user_agent": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_windows_aid": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "di_match_click_token": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "last_attributed_touch_data_plus_referring_domain": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_plus_via_features": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_journey_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_journey_name": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_organic_search_url": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_view_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_view_name": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "request_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_android_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_app_package_name": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_app_version": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_idfv": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_referral_source": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_screen_height": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "user_data_screen_width": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "user_data_sdk_version": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "attributed": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "custom_data": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "additionalProperties": true
+    },
+    "days_from_install_to_opt_in": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "days_from_last_attributed_touch_to_event": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "deep_linked": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "event_data_custom_param_1": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "event_data_custom_param_2": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "event_data_custom_param_3": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "existing_user": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "first_event_for_user": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "hours_from_last_attributed_touch_to_event": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "install_activity_timestamp": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "install_activity_touch_data_dollar_meta_is_mobile_data_terms_signed": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "install_activity_touch_data_tilde_campaign": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "install_activity_touch_data_tilde_channel": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "install_activity_touch_data_tilde_feature": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_dollar_fb_data_terms_not_signed": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "last_attributed_touch_data_tilde_keyword_match_type": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_timestamp": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "last_attributed_touch_type": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_custom_fields": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_dollar_3p": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_dollar_meta_is_mobile_data_terms_signed": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "last_cta_view_data_plus_referring_domain": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_plus_touch_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_plus_via_features": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_plus_web_format": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_ad_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_ad_name": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_ad_set_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_ad_set_name": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_advertising_partner_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_advertising_partner_name": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_agency": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_agency_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_banner_dimensions": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_branch_ad_format": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_campaign": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_campaign_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_campaign_type": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_channel": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_creative_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_creative_name": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_customer_ad_name": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_customer_ad_set_name": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_customer_campaign": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_customer_keyword": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_customer_placement": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_customer_secondary_publisher": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_customer_sub_site_name": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_external_touch_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_feature": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_id": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "last_cta_view_data_tilde_journey_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_journey_name": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_keyword": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_keyword_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_optimization_model": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_placement": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_placement_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_secondary_ad_format": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_secondary_publisher": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_secondary_publisher_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_stage": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_sub_site_name": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_tags": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "string"
+        ]
+      }
+    },
+    "last_cta_view_data_tilde_technology_partner": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_tune_publisher_id": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "last_cta_view_data_tilde_tune_publisher_name": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_tune_publisher_sub1": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_tune_publisher_sub2": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_tune_publisher_sub3": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_tune_publisher_sub4": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_tune_publisher_sub5": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_view_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_data_tilde_view_name": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_cta_view_timestamp": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "match_guaranteed": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "minutes_from_last_attributed_touch_to_event": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "reengagement_activity_touch_data_dollar_meta_is_mobile_data_terms_signed": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "referrer_click_timestamp": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "seconds_from_last_attributed_touch_to_event": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "store_install_begin_timestamp": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "user_data_app_store": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_build": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_carrier_name": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_cpu_type": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_installer_package_name": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_internet_connection_type": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "user_data_opted_in": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "user_data_opted_in_status": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_ad_name": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_ad_set_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_attributed_touch_data_tilde_ad_set_name": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "content_items": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "object"
+        ],
+        "properties": {
+          "custom_fields": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dollar_address_city": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dollar_address_country": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dollar_address_postal_code": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dollar_address_region": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dollar_address_street": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dollar_canonical_identifier": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dollar_canonical_url": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dollar_condition": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dollar_content_schema": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dollar_creation_timestamp": {
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "dollar_currency": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dollar_exp_date": {
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "dollar_image_captions": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dollar_keywords": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dollar_latitude": {
+            "type": [
+              "null",
+              "number"
+            ]
+          },
+          "dollar_locally_indexable": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "dollar_longitude": {
+            "type": [
+              "null",
+              "number"
+            ]
+          },
+          "dollar_og_description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dollar_og_image_url": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dollar_og_title": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dollar_price": {
+            "type": [
+              "null",
+              "number"
+            ]
+          },
+          "dollar_price_in_usd": {
+            "type": [
+              "null",
+              "number"
+            ]
+          },
+          "dollar_product_brand": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dollar_product_category": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dollar_product_name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dollar_product_variant": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dollar_publicly_indexable": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "dollar_quantity": {
+            "type": [
+              "null",
+              "number"
+            ]
+          },
+          "dollar_rating": {
+            "type": [
+              "null",
+              "number"
+            ]
+          },
+          "dollar_rating_average": {
+            "type": [
+              "null",
+              "number"
+            ]
+          },
+          "dollar_rating_count": {
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "dollar_rating_max": {
+            "type": [
+              "null",
+              "number"
+            ]
+          },
+          "dollar_sku": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dollar_value": {
+            "type": [
+              "null",
+              "number"
+            ]
+          },
+          "dollar_value_in_usd": {
+            "type": [
+              "null",
+              "number"
+            ]
+          },
+          "dollar_android_url": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dollar_desktop_url": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dollar_ios_url": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      }
+    },
+    "customer_event_alias": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "event_data_ad_type": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "event_data_affiliation": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "event_data_coupon": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "event_data_currency": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "event_data_description": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "event_data_exchange_rate": {
+      "type": [
+        "null",
+        "number"
+      ]
+    },
+    "event_data_revenue": {
+      "type": [
+        "null",
+        "number"
+      ]
+    },
+    "event_data_revenue_in_usd": {
+      "type": [
+        "null",
+        "number"
+      ]
+    },
+    "event_data_search_query": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "event_data_shipping": {
+      "type": [
+        "null",
+        "number"
+      ]
+    },
+    "event_data_tax": {
+      "type": [
+        "null",
+        "number"
+      ]
+    },
+    "event_data_transaction_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "event_data_custom_param_4": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "event_data_custom_param_5": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "event_data_custom_param_6": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "event_data_custom_param_7": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "event_data_custom_param_8": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "event_data_custom_param_9": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "event_data_custom_param_10": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "webhook_request_headers": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "additionalProperties": true
+    },
+    "webhook_request_url": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "webhook_response_code": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    }
+  }
+}
