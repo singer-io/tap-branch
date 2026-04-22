@@ -21,7 +21,10 @@ setup(
       """,
       packages=find_packages(),
       package_data={
-          "tap_branch": ["schemas/*.json"],
+          "tap_branch": [
+              "schemas/*.json",
+              "schemas/shared/*.json",
+          ],
       },
       include_package_data=True,
 )
