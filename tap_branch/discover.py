@@ -60,7 +60,8 @@ def _check_stream_access(client, stream_name: str) -> bool:
         # rather than silently excluding every stream.
         LOGGER.error(
             "Authentication failed during discovery. Verify that 'branch_access_token' "
-            "and 'branch_app_id' are correct."
+            "and 'branch_app_id' are correct. API response: %s",
+            e.response.text if e.response is not None else str(e),
         )
         raise
     except BranchForbiddenError:
@@ -81,9 +82,13 @@ def _check_stream_access(client, stream_name: str) -> bool:
 def discover(client) -> Catalog:
     """
     Run the discovery mode, prepare the catalog file and return the catalog.
-
-    Each stream is probed for access and streams that return 401, 403, or 400
-    are excluded from the returned catalog.
+    Each stream is probed via the data-readiness endpoint before being added
+    to the catalog:
+      - 401 (Unauthorized): aborts discovery immediately — credentials are invalid.
+      - 403 (Forbidden) / 400 (Bad Request): stream is excluded from the catalog.
+      - Success: stream is included in the catalog.
+    Raises BranchUnauthorizedError if credentials are invalid.
+    Raises BranchError if no streams are accessible after all probes.
     """
     schemas, field_metadata = get_schemas()
     catalog = Catalog([])
