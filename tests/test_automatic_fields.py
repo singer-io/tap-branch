@@ -1,8 +1,10 @@
 """Test that automatic fields (primary keys, replication keys) have
 inclusion=automatic in the catalog metadata."""
 import unittest
+from unittest.mock import patch
 
 import singer.metadata as singer_metadata
+from tap_branch.client import Client
 from tap_branch.discover import discover
 
 from base import BranchBaseTest
@@ -11,10 +13,16 @@ from base import BranchBaseTest
 class TestAutomaticFields(BranchBaseTest, unittest.TestCase):
     """Primary keys and replication keys must have inclusion=automatic."""
 
+    @classmethod
+    def setUpClass(cls):
+        config = cls.make_config()
+        client = Client(config)
+        with patch.object(Client, "check_data_readiness", return_value=True):
+            cls.catalog = discover(client)
+
     def test_primary_keys_are_automatic(self):
         """Each stream's primary key(s) have inclusion=automatic."""
-        catalog = discover()
-        stream_map = {e.tap_stream_id: e for e in catalog.streams}
+        stream_map = {e.tap_stream_id: e for e in self.catalog.streams}
         expected = self.expected_metadata()
 
         for stream_name in self.STREAMS_TO_TEST:
@@ -29,8 +37,7 @@ class TestAutomaticFields(BranchBaseTest, unittest.TestCase):
 
     def test_replication_keys_are_automatic(self):
         """Each incremental stream's replication key has inclusion=automatic."""
-        catalog = discover()
-        stream_map = {e.tap_stream_id: e for e in catalog.streams}
+        stream_map = {e.tap_stream_id: e for e in self.catalog.streams}
         expected = self.expected_metadata()
 
         for stream_name in self.STREAMS_TO_TEST:
