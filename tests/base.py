@@ -48,9 +48,14 @@ class BranchBaseTest:
     def _get_selected_stream(stream_name):
         """Return a CatalogEntry for *stream_name* with ``selected=True``."""
         import singer.metadata as singer_metadata
+        from unittest.mock import patch
+        from tap_branch.client import Client
         from tap_branch.discover import discover
 
-        catalog = discover()
+        config = BranchBaseTest.make_config()
+        client = Client(config)
+        with patch.object(Client, "check_data_readiness", return_value=True):
+            catalog = discover(client)
         stream_entry = catalog.get_stream(stream_name)
         meta_map = singer_metadata.to_map(stream_entry.metadata)
         meta_map[()]["selected"] = True
