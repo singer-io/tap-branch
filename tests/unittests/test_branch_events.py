@@ -10,7 +10,7 @@ from requests.exceptions import ChunkedEncodingError, ConnectionError, Timeout
 
 from tap_branch.branch_api_contract import EndpointConfig
 from tap_branch.branch_constants import MAX_BRANCH_DATE_WINDOW
-from tap_branch.exceptions import BranchError
+from tap_branch.exceptions import BranchBadRequestError, BranchError
 from tap_branch.streams.branch_events import BranchEventsBaseStream
 
 
@@ -449,6 +449,55 @@ class TestBranchEventsBaseStream(unittest.TestCase):
             call_args[1]["query_params_data"]["app_id"],
             self.mock_client.config["branch_app_id"]
         )
+
+    @patch("singer.bookmarks.get_bookmark")
+    def test_sync_raises_descriptive_error_on_validation_exception(self, mock_get_bookmark):
+        """When check_data_readiness raises BranchBadRequestError with 'validation exception',
+        sync must re-raise with a message that names the stream, the start_date, and the raw
+        API response body."""
+        mock_get_bookmark.return_value = "2024-01-01T00:00:00Z"
+        self.mock_client.build_headers.return_value = {"Access-Token": "test_token"}
+        self.mock_client.build_query_params.return_value = {"app_id": "test_app_id"}
+
+        # Simulate the Branch API returning 400 "A validation exception has occurred."
+        raw_body = '{"error": "A validation exception has occurred."}'
+        mock_response = MagicMock()
+        mock_response.text = raw_body
+        self.mock_client.check_data_readiness.side_effect = BranchBadRequestError(
+            "HTTP-error-code: 400, Error: A validation exception has occurred.",
+            mock_response,
+        )
+
+        with self.assertRaises(BranchBadRequestError) as ctx:
+            self.stream.sync({}, MagicMock())
+
+        error_message = str(ctx.exception)
+        self.assertIn("start_date", error_message)
+        self.assertIn("2024-01-01", error_message)
+        self.assertIn("eo_click", error_message)
+        self.assertIn(raw_body, error_message)
+        # Original exception is chained
+        self.assertIsInstance(ctx.exception.__cause__, BranchBadRequestError)
+
+    @patch("singer.bookmarks.get_bookmark")
+    def test_sync_propagates_unexpected_400_unchanged(self, mock_get_bookmark):
+        """A BranchBadRequestError that does NOT contain 'validation exception' must
+        be re-raised as-is (not replaced with the start_date message)."""
+        mock_get_bookmark.return_value = "2024-01-01T00:00:00Z"
+        self.mock_client.build_headers.return_value = {"Access-Token": "test_token"}
+        self.mock_client.build_query_params.return_value = {"app_id": "test_app_id"}
+
+        original_error = BranchBadRequestError(
+            "HTTP-error-code: 400, Error: Some unexpected bad request error."
+        )
+        self.mock_client.check_data_readiness.side_effect = original_error
+
+        with self.assertRaises(BranchBadRequestError) as ctx:
+            self.stream.sync({}, MagicMock())
+
+        # Must be the original exception, not a rewritten one
+        self.assertIs(ctx.exception, original_error)
+        self.assertNotIn("start_date", str(ctx.exception))
 
     @patch("tap_branch.streams.branch_events.BranchEventsBaseStream._fetch_export_data")
     def test_extract_data_empty_response(self, mock_fetch):

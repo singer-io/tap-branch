@@ -14,7 +14,7 @@ from singer.transform import Transformer
 from tap_branch.branch_api_contract import BranchExportConfig, EndpointConfig
 from tap_branch.branch_constants import (BRANCH_EVENTS_SCHEMA, JOB_TIMEOUT,
                                          MAX_BRANCH_DATE_WINDOW)
-from tap_branch.exceptions import BranchError
+from tap_branch.exceptions import BranchBadRequestError, BranchError
 from tap_branch.streams.abstracts import IncrementalStream
 
 LOGGER = singer.get_logger()
@@ -125,9 +125,20 @@ class BranchEventsBaseStream(IncrementalStream):
                 headers_data=self.required_headers,
                 query_params_data=self.required_query_params
             )
-            data_ready = self.client.check_data_readiness(export_start=export_start.to_datetime_string(),
-                                                          report_type=report_type,
-                                                          api_config=data_ready_api_config)
+            try:
+                data_ready = self.client.check_data_readiness(export_start=export_start.to_datetime_string(),
+                                                              report_type=report_type,
+                                                              api_config=data_ready_api_config)
+            except BranchBadRequestError as e:
+                if "validation exception" in str(e).lower():
+                    api_response = e.response.text if e.response is not None else str(e)
+                    raise BranchBadRequestError(
+                        f"Invalid start_date '{export_start.to_date_string()}' for stream '{report_type}': "
+                        f"the date is outside this account's data-retention window. "
+                        f"Update 'start_date' in the config to a more recent date. "
+                        f"API response: {api_response}"
+                    ) from e
+                raise
             if data_ready is False:
                 LOGGER.info("Data is not ready for the time period %s against the report_type %s", export_start, report_type)
                 return 0

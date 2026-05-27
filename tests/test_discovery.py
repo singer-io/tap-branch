@@ -1,7 +1,9 @@
 """Test tap discovery mode and metadata."""
 import unittest
+from unittest.mock import patch
 
 import singer.metadata as singer_metadata
+from tap_branch.client import Client
 from tap_branch.discover import discover
 
 from base import BranchBaseTest
@@ -10,18 +12,23 @@ from base import BranchBaseTest
 class TestDiscovery(BranchBaseTest, unittest.TestCase):
     """Verify that discover() returns the expected streams and catalog metadata."""
 
+    @classmethod
+    def setUpClass(cls):
+        config = cls.make_config()
+        client = Client(config)
+        with patch.object(Client, "check_data_readiness", return_value=True):
+            cls.catalog = discover(client)
+
     def test_expected_streams_in_catalog(self):
         """All 3 representative streams appear in the catalog."""
-        catalog = discover()
-        stream_ids = {entry.tap_stream_id for entry in catalog.streams}
+        stream_ids = {entry.tap_stream_id for entry in self.catalog.streams}
         for stream_name in self.STREAMS_TO_TEST:
             with self.subTest(stream=stream_name):
                 self.assertIn(stream_name, stream_ids)
 
     def test_primary_keys(self):
         """Primary keys match expected metadata for each stream."""
-        catalog = discover()
-        stream_map = {e.tap_stream_id: e for e in catalog.streams}
+        stream_map = {e.tap_stream_id: e for e in self.catalog.streams}
         expected = self.expected_metadata()
 
         for stream_name in self.STREAMS_TO_TEST:
@@ -32,8 +39,7 @@ class TestDiscovery(BranchBaseTest, unittest.TestCase):
 
     def test_replication_methods(self):
         """Replication methods match expected metadata for each stream."""
-        catalog = discover()
-        stream_map = {e.tap_stream_id: e for e in catalog.streams}
+        stream_map = {e.tap_stream_id: e for e in self.catalog.streams}
         expected = self.expected_metadata()
 
         for stream_name in self.STREAMS_TO_TEST:
@@ -44,8 +50,7 @@ class TestDiscovery(BranchBaseTest, unittest.TestCase):
 
     def test_replication_keys(self):
         """Replication keys match expected metadata for each stream."""
-        catalog = discover()
-        stream_map = {e.tap_stream_id: e for e in catalog.streams}
+        stream_map = {e.tap_stream_id: e for e in self.catalog.streams}
         expected = self.expected_metadata()
 
         for stream_name in self.STREAMS_TO_TEST:
@@ -56,8 +61,7 @@ class TestDiscovery(BranchBaseTest, unittest.TestCase):
 
     def test_eo_click_replication_key_is_automatic(self):
         """eo_click's 'timestamp' replication key has inclusion=automatic."""
-        catalog = discover()
-        stream_entry = catalog.get_stream("eo_click")
+        stream_entry = self.catalog.get_stream("eo_click")
         meta_map = singer_metadata.to_map(stream_entry.metadata)
         inclusion = meta_map.get(("properties", "timestamp"), {}).get("inclusion")
         self.assertEqual(inclusion, "automatic")
