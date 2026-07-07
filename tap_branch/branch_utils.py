@@ -3,7 +3,6 @@ import re
 import requests
 import singer
 
-from tap_branch.branch_constants import MAX_RETRY_WAIT_SECONDS
 from tap_branch.exceptions import (BranchRateLimitError,
                                    BranchUnsupportedFieldsError)
 
@@ -83,16 +82,9 @@ def raise_for_branch_rate_limit(response: requests.Response):
         if code == 7 and "retry after" in message.lower():
             retry_seconds = extract_retry_seconds(message)
 
-            if retry_seconds and retry_seconds > MAX_RETRY_WAIT_SECONDS:
-                LOGGER.info(
-                    "Branch rate limit encountered. Retry after %s seconds "
-                    "exceeds the %ss cap; will wait %ss and retry.",
-                    retry_seconds, MAX_RETRY_WAIT_SECONDS, MAX_RETRY_WAIT_SECONDS
-                )
-            else:
-                LOGGER.info(
-                    "Branch rate limit encountered. Retry after %s seconds",
-                    retry_seconds
-                )
+            LOGGER.info(
+                "Branch rate limit encountered. Retry after %s seconds",
+                retry_seconds
+            )
 
             raise BranchRateLimitError(message)
