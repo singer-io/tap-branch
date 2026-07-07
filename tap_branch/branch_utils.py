@@ -4,8 +4,7 @@ import requests
 import singer
 
 from tap_branch.branch_constants import MAX_RETRY_WAIT_SECONDS
-from tap_branch.exceptions import (BranchFatalRateLimitError,
-                                   BranchRateLimitError,
+from tap_branch.exceptions import (BranchRateLimitError,
                                    BranchUnsupportedFieldsError)
 
 LOGGER = singer.get_logger()
@@ -57,12 +56,17 @@ def handle_branch_validation_error(response: requests.Response):
 def raise_for_branch_rate_limit(response: requests.Response):
     """ Function to detect and raise appropriate branch rate-limit error
 
+    Always raises BranchRateLimitError so the caller's backoff decorator can
+    retry. The actual wait time is capped at MAX_RETRY_WAIT_SECONDS by
+    rate_limit_wait_gen in client.py, regardless of how long Branch asked us
+    to wait, so long waits result in a capped retry rather than an
+    unbounded sleep.
+
     Args:
         response (requests.Response): Response object
 
     Raises:
-        BranchFatalRateLimitError: Raised when wait time exceeds configured limit
-        BranchRateLimitError: Raised when wait time is under the configured limit
+        BranchRateLimitError: Raised whenever Branch reports a rate limit
     """
 
     try:
@@ -79,14 +83,16 @@ def raise_for_branch_rate_limit(response: requests.Response):
         if code == 7 and "retry after" in message.lower():
             retry_seconds = extract_retry_seconds(message)
 
-            LOGGER.info(
-                "Branch rate limit encountered. Retry after %s seconds",
-                retry_seconds
-            )
-
             if retry_seconds and retry_seconds > MAX_RETRY_WAIT_SECONDS:
-                raise BranchFatalRateLimitError(
-                    f"Retry time {retry_seconds}s exceeds allowed limit of {MAX_RETRY_WAIT_SECONDS}s"
+                LOGGER.info(
+                    "Branch rate limit encountered. Retry after %s seconds "
+                    "exceeds the %ss cap; will wait %ss and retry.",
+                    retry_seconds, MAX_RETRY_WAIT_SECONDS, MAX_RETRY_WAIT_SECONDS
                 )
             else:
-                raise BranchRateLimitError(message)
+                LOGGER.info(
+                    "Branch rate limit encountered. Retry after %s seconds",
+                    retry_seconds
+                )
+
+            raise BranchRateLimitError(message)

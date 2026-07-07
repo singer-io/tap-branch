@@ -320,19 +320,23 @@ class TestRateLimitBackoffBehaviour(unittest.TestCase):
         self.assertEqual(mock_request.call_count, 2)
 
     @patch("time.sleep")
-    def test_fatal_rate_limit_is_not_retried(self, mock_sleep):
-        """BranchFatalRateLimitError (retry window too large) is not a
-        subclass of BranchRateLimitError, so it must NOT be caught by the
-        rate-limit backoff decorator and must propagate on the first attempt."""
+    def test_large_retry_seconds_is_capped_and_retried(self, mock_sleep):
+        """When Branch's requested retry window exceeds MAX_RETRY_WAIT_SECONDS,
+        BranchRateLimitError is still raised (not a fatal error), the wait
+        generator caps the sleep at MAX_RETRY_WAIT_SECONDS, and the request
+        is retried up to max_tries=3 like any other rate limit."""
         with patch.object(
             self.client._session, "request",
             return_value=self._make_429_response(retry_seconds=999999)
         ) as mock_request:
-            with self.assertRaises(BranchFatalRateLimitError):
+            with self.assertRaises(BranchRateLimitError):
                 self.client._Client__make_request("GET", "https://api.example.com/resource")
 
-        # Must be called only once — no retry
-        self.assertEqual(mock_request.call_count, 1)
+        self.assertEqual(mock_request.call_count, 3)
+        # Every sleep call must be capped at MAX_RETRY_WAIT_SECONDS, never the
+        # full 999999s Branch asked for.
+        for call in mock_sleep.call_args_list:
+            self.assertLessEqual(call.args[0], MAX_RETRY_WAIT_SECONDS)
 
     def test_branch_rate_limit_error_has_no_code_attribute(self):
         """Regression: BranchRateLimitError must not have a ``.code``

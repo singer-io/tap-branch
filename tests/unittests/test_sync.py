@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock, patch
 
-from tap_branch.exceptions import BranchFatalRateLimitError
+from tap_branch.exceptions import BranchRateLimitError
 from tap_branch.sync import sync, update_currently_syncing, write_schema
 
 
@@ -91,7 +91,7 @@ class TestSync(unittest.TestCase):
         client = MagicMock()
         config = {}
 
-        with patch("tap_branch.streams.BranchEventsBaseStream.sync", side_effect=BranchFatalRateLimitError("Rate limit exceeded")):
+        with patch("tap_branch.streams.BranchEventsBaseStream.sync", side_effect=BranchRateLimitError("Rate limit exceeded")):
             with self.assertRaises(Exception) as context:
                 sync(client, config, mock_catalog, state)
 
