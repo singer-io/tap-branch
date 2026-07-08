@@ -27,12 +27,12 @@ class TestUtils(unittest.TestCase):
 
     @parameterized.expand([
         ["small retry seconds", 10, "Rate limit exceeded retry after 10 seconds."],
-        ["retry seconds exceeding cap", 3600, "Rate limit exceeded retry after 3600 seconds."]
+        ["large retry seconds", 3600, "Rate limit exceeded retry after 3600 seconds."]
     ])
     def test_branch_rate_limit_error(self, test_name, retry_seconds, expected_message):
         """ Test to validate that rate limit errors always raise BranchRateLimitError
         (retryable), regardless of how long Branch asked us to wait. The actual wait
-        time gets capped at MAX_RETRY_WAIT_SECONDS by rate_limit_wait_gen in client.py."""
+        time is honored exactly (no capping) by rate_limit_wait_gen in client.py."""
 
         mock_response = MagicMock()
         mock_response.json.return_value = {

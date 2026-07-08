@@ -63,18 +63,20 @@ def raise_for_error(response: requests.Response) -> None:
 def rate_limit_wait_gen(**kwargs):
     """Backoff wait generator for rate-limit retries.
 
-    This generator extracts the retry seconds from the exception message and
-    yields the appropriate wait time for backoff to use.
+    Branch's own documentation instructs API consumers to respect the exact
+    "retry after N seconds" value it returns (e.g. their documented example
+    is 3418 seconds), rather than imposing an artificial ceiling. This
+    generator extracts that value from the exception message and waits the
+    full duration Branch asked for. If Branch's response doesn't include a
+    parseable retry duration, MAX_RETRY_WAIT_SECONDS is used as a fallback
+    default.
     """
     retry_details = yield  # prime the generator (backoff calls next() first)
     while True:
         # backoff sends exception object directly, not in a dict
         exc = retry_details if isinstance(retry_details, Exception) else None
         retry_seconds = extract_retry_seconds(str(exc)) if exc else None
-        if retry_seconds is not None:
-            wait_time = min(retry_seconds, MAX_RETRY_WAIT_SECONDS)
-        else:
-            wait_time = MAX_RETRY_WAIT_SECONDS
+        wait_time = retry_seconds if retry_seconds is not None else MAX_RETRY_WAIT_SECONDS
         LOGGER.info("Rate limit wait: %s seconds", wait_time)
         retry_details = yield wait_time
 
@@ -187,7 +189,7 @@ class Client:
             wait_gen=rate_limit_wait_gen,
             exception=BranchRateLimitError,
             jitter=None,
-            max_tries=3
+            max_tries=2
     )
     @backoff.on_exception(
         wait_gen=backoff.expo,
