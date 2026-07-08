@@ -60,6 +60,9 @@ def raise_for_error(response: requests.Response) -> None:
         raise exc(message, response) from None
 
 
+RATE_LIMIT_WAIT_BUFFER_SECONDS = 3
+
+
 def rate_limit_wait_gen(**kwargs):
     """Backoff wait generator for rate-limit retries.
 
@@ -67,20 +70,21 @@ def rate_limit_wait_gen(**kwargs):
     "retry after N seconds" value it returns (e.g. their documented example
     is 3418 seconds), rather than imposing an artificial ceiling. This
     generator extracts that value from the exception message and waits the
-    full duration Branch asked for, plus a 1-second buffer. The buffer
-    matters because Branch appears to round/truncate its reported wait down
-    to whole seconds, so a reported "0 seconds" does not mean the rate limit
-    has actually cleared yet — retrying instantly on a literal 0-second wait
-    was observed to just hit the same limit again. If Branch's response
-    doesn't include a parseable retry duration, MAX_RETRY_WAIT_SECONDS is
-    used as a fallback default.
+    full duration Branch asked for, plus a small buffer
+    (RATE_LIMIT_WAIT_BUFFER_SECONDS). The buffer matters because Branch
+    appears to round/truncate its reported wait down to whole seconds, so a
+    reported "0 seconds" does not mean the rate limit has actually cleared
+    yet — retrying instantly on a literal 0-second wait was observed to just
+    hit the same limit again. If Branch's response doesn't include a
+    parseable retry duration, MAX_RETRY_WAIT_SECONDS is used as a fallback
+    default.
     """
     retry_details = yield  # prime the generator (backoff calls next() first)
     while True:
         # backoff sends exception object directly, not in a dict
         exc = retry_details if isinstance(retry_details, Exception) else None
         retry_seconds = extract_retry_seconds(str(exc)) if exc else None
-        wait_time = retry_seconds + 1 if retry_seconds is not None else MAX_RETRY_WAIT_SECONDS
+        wait_time = retry_seconds + RATE_LIMIT_WAIT_BUFFER_SECONDS if retry_seconds is not None else MAX_RETRY_WAIT_SECONDS
         LOGGER.info("Rate limit wait: %s seconds", wait_time)
         retry_details = yield wait_time
 

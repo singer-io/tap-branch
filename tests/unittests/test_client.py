@@ -231,15 +231,15 @@ class TestRateLimitWaitGenerator(unittest.TestCase):
     """Test cases for the rate_limit_wait_gen function"""
 
     @parameterized.expand([
-        ["with retry seconds", BranchRateLimitError, "Limit exceeded, retry after 300 seconds", 301],
-        ["honors long retry seconds without capping", BranchRateLimitError, "Limit exceeded, retry after 3418 seconds", 3419],
-        ["zero retry seconds still gets a buffer", BranchRateLimitError, "Limit exceeded, retry after 0 seconds", 1],
+        ["with retry seconds", BranchRateLimitError, "Limit exceeded, retry after 300 seconds", 303],
+        ["honors long retry seconds without capping", BranchRateLimitError, "Limit exceeded, retry after 3418 seconds", 3421],
+        ["zero retry seconds still gets a buffer", BranchRateLimitError, "Limit exceeded, retry after 0 seconds", 3],
         ["fallback to default", BranchRateLimitError, "Rate limit exceeded", MAX_RETRY_WAIT_SECONDS],
         ["None exception", None, None, MAX_RETRY_WAIT_SECONDS]
     ])
     def test_rate_limit_wait_gen_with_retry_seconds(self, test_name, exception_class, exception_message, expected_wait_time):
         """Test that the generator returns Branch's exact retry-after duration
-        plus a 1-second buffer (without capping), and falls back to the
+        plus a small buffer (without capping), and falls back to the
         default wait only when no retry duration could be parsed from the
         exception. The buffer guards against Branch reporting "0 seconds"
         when its rate limit hasn't actually cleared yet (observed in
@@ -314,7 +314,7 @@ class TestRateLimitBackoffBehaviour(unittest.TestCase):
         """Reproduces the production scenario: first 429 says wait 329s,
         second 429 says wait 0s (limit not fully cleared yet), third
         attempt succeeds. This requires max_tries=3, and each wait includes
-        the 1-second buffer."""
+        the buffer."""
         success_resp = MagicMock()
         success_resp.status_code = 200
         success_resp.json.return_value = {"data": "ok"}
@@ -331,8 +331,8 @@ class TestRateLimitBackoffBehaviour(unittest.TestCase):
 
         self.assertEqual(result, {"data": "ok"})
         self.assertEqual(mock_request.call_count, 3)
-        mock_sleep.assert_any_call(330)
-        mock_sleep.assert_any_call(1)
+        mock_sleep.assert_any_call(332)
+        mock_sleep.assert_any_call(3)
 
     @patch("time.sleep")
     def test_rate_limit_succeeds_after_retry(self, mock_sleep):
@@ -365,9 +365,9 @@ class TestRateLimitBackoffBehaviour(unittest.TestCase):
 
         self.assertEqual(mock_request.call_count, 3)
         # Every sleep call must honor Branch's exact requested duration (plus
-        # the 1-second buffer), not a capped/truncated value.
+        # the buffer), not a capped/truncated value.
         for call in mock_sleep.call_args_list:
-            self.assertEqual(call.args[0], 1000000)
+            self.assertEqual(call.args[0], 1000002)
 
     def test_branch_rate_limit_error_has_no_code_attribute(self):
         """Regression: BranchRateLimitError must not have a ``.code``
