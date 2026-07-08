@@ -11,7 +11,7 @@ MAX_BRANCH_DATE_WINDOW = 60
 JOB_TIMEOUT = 60 * 60
 POLL_INTERVAL = 60 * 2
 
-MAX_RETRY_WAIT_SECONDS = 60 * 15  # Fallback wait when Branch's rate-limit response has no parseable retry duration.
+DEFAULT_RATE_LIMIT_WAIT_SECONDS = 60 * 15  # Fallback wait when Branch's rate-limit response has no parseable retry duration.
 MAX_RECORDS_TO_FETCH = 1_000_000
 
 BASE_DIR = Path(__file__).resolve().parent

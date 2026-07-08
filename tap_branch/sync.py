@@ -63,7 +63,7 @@ def sync(client: Client, config: Dict, catalog: singer.Catalog, state) -> None:
             try:
                 total_records = stream.sync(state=state, transformer=transformer)
             except BranchRateLimitError as err:
-                LOGGER.error("Fatal Rate Limit Error for stream {}. Message: {}. Writing state".format(stream_name, str(err)))
+                LOGGER.error("Rate limit retries exhausted for stream {}. Message: {}. Writing state".format(stream_name, str(err)))
                 singer.write_state(state)
 
                 # Re-raise the error to stop the sync while preserving the original traceback

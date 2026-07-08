@@ -56,9 +56,10 @@ def raise_for_branch_rate_limit(response: requests.Response):
     """ Function to detect and raise appropriate branch rate-limit error
 
     Always raises BranchRateLimitError so the caller's backoff decorator can
-    retry once, waiting the exact "retry after N seconds" duration Branch
-    reports (see rate_limit_wait_gen in client.py), per Branch's own
-    documented guidance to respect the indicated retry duration.
+    retry (see max_tries on the decorator in client.py), waiting the exact
+    "retry after N seconds" duration Branch reports (see rate_limit_wait_gen
+    in client.py), per Branch's own documented guidance to respect the
+    indicated retry duration.
 
     Args:
         response (requests.Response): Response object

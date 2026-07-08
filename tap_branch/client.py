@@ -14,7 +14,7 @@ from tap_branch.branch_api_contract import (BranchDataReadyPayload,
                                             BranchExportJobPayload,
                                             EndpointConfig)
 from tap_branch.branch_constants import (JOB_TIMEOUT, MAX_RECORDS_TO_FETCH,
-                                         MAX_RETRY_WAIT_SECONDS, POLL_INTERVAL)
+                                         DEFAULT_RATE_LIMIT_WAIT_SECONDS, POLL_INTERVAL)
 from tap_branch.branch_utils import (extract_retry_seconds,
                                      handle_branch_validation_error,
                                      raise_for_branch_rate_limit)
@@ -76,7 +76,7 @@ def rate_limit_wait_gen(**kwargs):
     reported "0 seconds" does not mean the rate limit has actually cleared
     yet — retrying instantly on a literal 0-second wait was observed to just
     hit the same limit again. If Branch's response doesn't include a
-    parseable retry duration, MAX_RETRY_WAIT_SECONDS is used as a fallback
+    parseable retry duration, DEFAULT_RATE_LIMIT_WAIT_SECONDS is used as a fallback
     default.
     """
     retry_details = yield  # prime the generator (backoff calls next() first)
@@ -84,7 +84,7 @@ def rate_limit_wait_gen(**kwargs):
         # backoff sends exception object directly, not in a dict
         exc = retry_details if isinstance(retry_details, Exception) else None
         retry_seconds = extract_retry_seconds(str(exc)) if exc else None
-        wait_time = retry_seconds + RATE_LIMIT_WAIT_BUFFER_SECONDS if retry_seconds is not None else MAX_RETRY_WAIT_SECONDS
+        wait_time = retry_seconds + RATE_LIMIT_WAIT_BUFFER_SECONDS if retry_seconds is not None else DEFAULT_RATE_LIMIT_WAIT_SECONDS
         LOGGER.info("Rate limit wait: %s seconds", wait_time)
         retry_details = yield wait_time
 

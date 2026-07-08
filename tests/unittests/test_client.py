@@ -6,7 +6,7 @@ import requests
 from parameterized import parameterized
 from requests.exceptions import ChunkedEncodingError, ConnectionError, Timeout
 
-from tap_branch.branch_constants import MAX_RETRY_WAIT_SECONDS
+from tap_branch.branch_constants import DEFAULT_RATE_LIMIT_WAIT_SECONDS
 from tap_branch.client import Client, raise_for_error, rate_limit_wait_gen
 from tap_branch.exceptions import *
 
@@ -234,8 +234,8 @@ class TestRateLimitWaitGenerator(unittest.TestCase):
         ["with retry seconds", BranchRateLimitError, "Limit exceeded, retry after 300 seconds", 303],
         ["honors long retry seconds without capping", BranchRateLimitError, "Limit exceeded, retry after 3418 seconds", 3421],
         ["zero retry seconds still gets a buffer", BranchRateLimitError, "Limit exceeded, retry after 0 seconds", 3],
-        ["fallback to default", BranchRateLimitError, "Rate limit exceeded", MAX_RETRY_WAIT_SECONDS],
-        ["None exception", None, None, MAX_RETRY_WAIT_SECONDS]
+        ["fallback to default", BranchRateLimitError, "Rate limit exceeded", DEFAULT_RATE_LIMIT_WAIT_SECONDS],
+        ["None exception", None, None, DEFAULT_RATE_LIMIT_WAIT_SECONDS]
     ])
     def test_rate_limit_wait_gen_with_retry_seconds(self, test_name, exception_class, exception_message, expected_wait_time):
         """Test that the generator returns Branch's exact retry-after duration
