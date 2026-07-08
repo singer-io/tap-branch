@@ -290,9 +290,12 @@ class TestRateLimitBackoffBehaviour(unittest.TestCase):
 
     @patch("time.sleep")
     def test_rate_limit_retries_exactly_max_tries(self, mock_sleep):
-        """BranchRateLimitError must be retried up to max_tries=2 (a single
-        retry after the initial attempt) before the exception propagates to
-        the caller."""
+        """BranchRateLimitError must be retried up to max_tries=3 (3 total
+        attempts) before the exception propagates to the caller. A single
+        retry proved insufficient in production: Branch can report a 429
+        with "retry after 0 seconds" on the second attempt (its rate-limit
+        window not having fully cleared), so a 3rd attempt is needed to
+        capitalize on that near-immediate clearance."""
         with patch.object(
             self.client._session, "request",
             return_value=self._make_429_response()
@@ -300,7 +303,31 @@ class TestRateLimitBackoffBehaviour(unittest.TestCase):
             with self.assertRaises(BranchRateLimitError):
                 self.client._Client__make_request("GET", "https://api.example.com/resource")
 
-        self.assertEqual(mock_request.call_count, 2)
+        self.assertEqual(mock_request.call_count, 3)
+
+    @patch("time.sleep")
+    def test_rate_limit_succeeds_after_second_retry(self, mock_sleep):
+        """Reproduces the production scenario: first 429 says wait 329s,
+        second 429 says wait 0s (limit not fully cleared yet), third
+        attempt succeeds. This requires max_tries=3."""
+        success_resp = MagicMock()
+        success_resp.status_code = 200
+        success_resp.json.return_value = {"data": "ok"}
+
+        with patch.object(
+            self.client._session, "request",
+            side_effect=[
+                self._make_429_response(retry_seconds=329),
+                self._make_429_response(retry_seconds=0),
+                success_resp,
+            ]
+        ) as mock_request:
+            result = self.client._Client__make_request("GET", "https://api.example.com/resource")
+
+        self.assertEqual(result, {"data": "ok"})
+        self.assertEqual(mock_request.call_count, 3)
+        mock_sleep.assert_any_call(329)
+        mock_sleep.assert_any_call(0)
 
     @patch("time.sleep")
     def test_rate_limit_succeeds_after_retry(self, mock_sleep):
@@ -323,7 +350,7 @@ class TestRateLimitBackoffBehaviour(unittest.TestCase):
     def test_large_retry_seconds_is_honored_without_capping(self, mock_sleep):
         """Per Branch's own documentation (which shows retry-after values as
         high as 3418 seconds), the tap must wait the exact duration Branch
-        asks for rather than truncating it, and retry once."""
+        asks for rather than truncating it, and retry up to max_tries=3."""
         with patch.object(
             self.client._session, "request",
             return_value=self._make_429_response(retry_seconds=999999)
@@ -331,10 +358,11 @@ class TestRateLimitBackoffBehaviour(unittest.TestCase):
             with self.assertRaises(BranchRateLimitError):
                 self.client._Client__make_request("GET", "https://api.example.com/resource")
 
-        self.assertEqual(mock_request.call_count, 2)
-        # The sleep call must honor Branch's exact requested duration, not a
+        self.assertEqual(mock_request.call_count, 3)
+        # Every sleep call must honor Branch's exact requested duration, not a
         # capped/truncated value.
-        mock_sleep.assert_called_once_with(999999)
+        for call in mock_sleep.call_args_list:
+            self.assertEqual(call.args[0], 999999)
 
     def test_branch_rate_limit_error_has_no_code_attribute(self):
         """Regression: BranchRateLimitError must not have a ``.code``

@@ -189,7 +189,7 @@ class Client:
             wait_gen=rate_limit_wait_gen,
             exception=BranchRateLimitError,
             jitter=None,
-            max_tries=2
+            max_tries=3
     )
     @backoff.on_exception(
         wait_gen=backoff.expo,
