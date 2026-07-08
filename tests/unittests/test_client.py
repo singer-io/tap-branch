@@ -231,15 +231,20 @@ class TestRateLimitWaitGenerator(unittest.TestCase):
     """Test cases for the rate_limit_wait_gen function"""
 
     @parameterized.expand([
-        ["with retry seconds", BranchRateLimitError, "Limit exceeded, retry after 300 seconds", 300],
-        ["honors long retry seconds without capping", BranchRateLimitError, "Limit exceeded, retry after 3418 seconds", 3418],
+        ["with retry seconds", BranchRateLimitError, "Limit exceeded, retry after 300 seconds", 301],
+        ["honors long retry seconds without capping", BranchRateLimitError, "Limit exceeded, retry after 3418 seconds", 3419],
+        ["zero retry seconds still gets a buffer", BranchRateLimitError, "Limit exceeded, retry after 0 seconds", 1],
         ["fallback to default", BranchRateLimitError, "Rate limit exceeded", MAX_RETRY_WAIT_SECONDS],
         ["None exception", None, None, MAX_RETRY_WAIT_SECONDS]
     ])
-    def test_rate_limit_wait_gen_with_retry_seconds(self, test_name, exception_class, exception_message, retry_seconds):
-        """Test that the generator returns the exact retry-after duration Branch
-        reports, without capping it, and falls back to the default wait only
-        when no retry duration could be parsed from the exception."""
+    def test_rate_limit_wait_gen_with_retry_seconds(self, test_name, exception_class, exception_message, expected_wait_time):
+        """Test that the generator returns Branch's exact retry-after duration
+        plus a 1-second buffer (without capping), and falls back to the
+        default wait only when no retry duration could be parsed from the
+        exception. The buffer guards against Branch reporting "0 seconds"
+        when its rate limit hasn't actually cleared yet (observed in
+        production: an instant retry on a literal 0-second wait just hit the
+        same limit again)."""
         gen = rate_limit_wait_gen()
         next(gen)  # Prime the generator
 
@@ -251,8 +256,7 @@ class TestRateLimitWaitGenerator(unittest.TestCase):
 
         wait_time = gen.send(mock_exc)
 
-        # Should return retry_seconds for the specific Exception classes and error message
-        self.assertEqual(wait_time, retry_seconds)
+        self.assertEqual(wait_time, expected_wait_time)
 
 
 class TestRateLimitBackoffBehaviour(unittest.TestCase):
@@ -309,7 +313,8 @@ class TestRateLimitBackoffBehaviour(unittest.TestCase):
     def test_rate_limit_succeeds_after_second_retry(self, mock_sleep):
         """Reproduces the production scenario: first 429 says wait 329s,
         second 429 says wait 0s (limit not fully cleared yet), third
-        attempt succeeds. This requires max_tries=3."""
+        attempt succeeds. This requires max_tries=3, and each wait includes
+        the 1-second buffer."""
         success_resp = MagicMock()
         success_resp.status_code = 200
         success_resp.json.return_value = {"data": "ok"}
@@ -326,8 +331,8 @@ class TestRateLimitBackoffBehaviour(unittest.TestCase):
 
         self.assertEqual(result, {"data": "ok"})
         self.assertEqual(mock_request.call_count, 3)
-        mock_sleep.assert_any_call(329)
-        mock_sleep.assert_any_call(0)
+        mock_sleep.assert_any_call(330)
+        mock_sleep.assert_any_call(1)
 
     @patch("time.sleep")
     def test_rate_limit_succeeds_after_retry(self, mock_sleep):
@@ -359,10 +364,10 @@ class TestRateLimitBackoffBehaviour(unittest.TestCase):
                 self.client._Client__make_request("GET", "https://api.example.com/resource")
 
         self.assertEqual(mock_request.call_count, 3)
-        # Every sleep call must honor Branch's exact requested duration, not a
-        # capped/truncated value.
+        # Every sleep call must honor Branch's exact requested duration (plus
+        # the 1-second buffer), not a capped/truncated value.
         for call in mock_sleep.call_args_list:
-            self.assertEqual(call.args[0], 999999)
+            self.assertEqual(call.args[0], 1000000)
 
     def test_branch_rate_limit_error_has_no_code_attribute(self):
         """Regression: BranchRateLimitError must not have a ``.code``
