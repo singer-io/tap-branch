@@ -4,7 +4,7 @@ import singer
 from singer.transform import UNIX_MILLISECONDS_INTEGER_DATETIME_PARSING
 
 from tap_branch.client import Client
-from tap_branch.exceptions import BranchFatalRateLimitError
+from tap_branch.exceptions import BranchRateLimitError
 from tap_branch.streams import STREAMS
 
 LOGGER = singer.get_logger()
@@ -62,8 +62,8 @@ def sync(client: Client, config: Dict, catalog: singer.Catalog, state) -> None:
             update_currently_syncing(state, stream_name)
             try:
                 total_records = stream.sync(state=state, transformer=transformer)
-            except BranchFatalRateLimitError as err:
-                LOGGER.error("Fatal Rate Limit Error for stream {}. Message: {}. Writing state".format(stream_name, str(err)))
+            except BranchRateLimitError as err:
+                LOGGER.error("Rate limit retries exhausted for stream {}. Message: {}. Writing state".format(stream_name, str(err)))
                 singer.write_state(state)
 
                 # Re-raise the error to stop the sync while preserving the original traceback

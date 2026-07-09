@@ -3,9 +3,7 @@ import re
 import requests
 import singer
 
-from tap_branch.branch_constants import MAX_RETRY_WAIT_SECONDS
-from tap_branch.exceptions import (BranchFatalRateLimitError,
-                                   BranchRateLimitError,
+from tap_branch.exceptions import (BranchRateLimitError,
                                    BranchUnsupportedFieldsError)
 
 LOGGER = singer.get_logger()
@@ -57,12 +55,17 @@ def handle_branch_validation_error(response: requests.Response):
 def raise_for_branch_rate_limit(response: requests.Response):
     """ Function to detect and raise appropriate branch rate-limit error
 
+    Always raises BranchRateLimitError so the caller's backoff decorator can
+    retry (see max_tries on the decorator in client.py), waiting the exact
+    "retry after N seconds" duration Branch reports (see rate_limit_wait_gen
+    in client.py), per Branch's own documented guidance to respect the
+    indicated retry duration.
+
     Args:
         response (requests.Response): Response object
 
     Raises:
-        BranchFatalRateLimitError: Raised when wait time exceeds configured limit
-        BranchRateLimitError: Raised when wait time is under the configured limit
+        BranchRateLimitError: Raised whenever Branch reports a rate limit
     """
 
     try:
@@ -84,9 +87,4 @@ def raise_for_branch_rate_limit(response: requests.Response):
                 retry_seconds
             )
 
-            if retry_seconds and retry_seconds > MAX_RETRY_WAIT_SECONDS:
-                raise BranchFatalRateLimitError(
-                    f"Retry time {retry_seconds}s exceeds allowed limit of {MAX_RETRY_WAIT_SECONDS}s"
-                )
-            else:
-                raise BranchRateLimitError(message)
+            raise BranchRateLimitError(message)

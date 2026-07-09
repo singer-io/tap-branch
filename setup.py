@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
       name="tap-branch",
-      version="0.0.1",
+      version="0.1.0",
       description="Singer.io tap for extracting data from branch API",
       author="Stitch",
       url="http://singer.io",

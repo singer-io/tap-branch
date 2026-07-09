@@ -14,7 +14,7 @@ from tap_branch.branch_api_contract import (BranchDataReadyPayload,
                                             BranchExportJobPayload,
                                             EndpointConfig)
 from tap_branch.branch_constants import (JOB_TIMEOUT, MAX_RECORDS_TO_FETCH,
-                                         MAX_RETRY_WAIT_SECONDS, POLL_INTERVAL)
+                                         DEFAULT_RATE_LIMIT_WAIT_SECONDS, POLL_INTERVAL)
 from tap_branch.branch_utils import (extract_retry_seconds,
                                      handle_branch_validation_error,
                                      raise_for_branch_rate_limit)
@@ -60,21 +60,31 @@ def raise_for_error(response: requests.Response) -> None:
         raise exc(message, response) from None
 
 
+RATE_LIMIT_WAIT_BUFFER_SECONDS = 3
+
+
 def rate_limit_wait_gen(**kwargs):
     """Backoff wait generator for rate-limit retries.
 
-    This generator extracts the retry seconds from the exception message and
-    yields the appropriate wait time for backoff to use.
+    Branch's own documentation instructs API consumers to respect the exact
+    "retry after N seconds" value it returns (e.g. their documented example
+    is 3418 seconds), rather than imposing an artificial ceiling. This
+    generator extracts that value from the exception message and waits the
+    full duration Branch asked for, plus a small buffer
+    (RATE_LIMIT_WAIT_BUFFER_SECONDS). The buffer matters because Branch
+    appears to round/truncate its reported wait down to whole seconds, so a
+    reported "0 seconds" does not mean the rate limit has actually cleared
+    yet — retrying instantly on a literal 0-second wait was observed to just
+    hit the same limit again. If Branch's response doesn't include a
+    parseable retry duration, DEFAULT_RATE_LIMIT_WAIT_SECONDS is used as a fallback
+    default.
     """
     retry_details = yield  # prime the generator (backoff calls next() first)
     while True:
         # backoff sends exception object directly, not in a dict
         exc = retry_details if isinstance(retry_details, Exception) else None
         retry_seconds = extract_retry_seconds(str(exc)) if exc else None
-        if retry_seconds is not None:
-            wait_time = min(retry_seconds, MAX_RETRY_WAIT_SECONDS)
-        else:
-            wait_time = MAX_RETRY_WAIT_SECONDS
+        wait_time = retry_seconds + RATE_LIMIT_WAIT_BUFFER_SECONDS if retry_seconds is not None else DEFAULT_RATE_LIMIT_WAIT_SECONDS
         LOGGER.info("Rate limit wait: %s seconds", wait_time)
         retry_details = yield wait_time
 

@@ -3,11 +3,9 @@ from unittest.mock import MagicMock
 
 from parameterized import parameterized
 
-from tap_branch.branch_constants import MAX_RETRY_WAIT_SECONDS
 from tap_branch.branch_utils import (raise_for_branch_rate_limit,
                                      handle_branch_validation_error)
-from tap_branch.exceptions import (BranchFatalRateLimitError,
-                                   BranchRateLimitError,
+from tap_branch.exceptions import (BranchRateLimitError,
                                    BranchUnsupportedFieldsError)
 
 
@@ -28,11 +26,13 @@ class TestUtils(unittest.TestCase):
         self.assertIn("test_field", context.exception.fields)
 
     @parameterized.expand([
-        ["small retry seconds", 10, BranchRateLimitError, "Rate limit exceeded retry after 10 seconds."],
-        ["large retry seconds", 3600, BranchFatalRateLimitError, f"Retry time 3600s exceeds allowed limit of {MAX_RETRY_WAIT_SECONDS}s"]
+        ["small retry seconds", 10, "Rate limit exceeded retry after 10 seconds."],
+        ["large retry seconds", 3600, "Rate limit exceeded retry after 3600 seconds."]
     ])
-    def test_branch_rate_limit_error(self, test_name, retry_seconds, expected_exception, expected_message):
-        """ Test to validate that rate limit errors are correctly handled and appropriate exceptions are raised based on retry seconds"""
+    def test_branch_rate_limit_error(self, test_name, retry_seconds, expected_message):
+        """ Test to validate that rate limit errors always raise BranchRateLimitError
+        (retryable), regardless of how long Branch asked us to wait. The actual wait
+        time is honored exactly (no capping) by rate_limit_wait_gen in client.py."""
 
         mock_response = MagicMock()
         mock_response.json.return_value = {
@@ -41,7 +41,7 @@ class TestUtils(unittest.TestCase):
             ]
         }
 
-        with self.assertRaises(expected_exception) as context:
+        with self.assertRaises(BranchRateLimitError) as context:
             raise_for_branch_rate_limit(mock_response)
 
         self.assertEqual(str(context.exception), expected_message)

@@ -127,8 +127,3 @@ class BranchExportFailed(BranchError):
 class BranchExportTimeout(BranchError):
     """ Class that represents branch export job not completed under set timeout"""
     pass
-
-
-class BranchFatalRateLimitError(BranchError):
-    """Non-retryable rate limit (retry too long)"""
-    pass
